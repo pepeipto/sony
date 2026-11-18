@@ -1,0 +1,44 @@
+:root {
+  --bg: #f5f3ec; --bg-2: #efece3; --surface: #fbfaf6; --line: #e2ddd0; --line-2: #d6d0c1;
+  --text: #2b2a27; --muted: #75716a; --faint: #a19c92;
+  --accent: #c2603e; --accent-2: #a94f31; --accent-soft: #f2e1d8;
+  --ok: #5b8a5a; --warn: #c08a2e; --bad: #b5473a;
+  --c-ram: #c2603e; --c-vram: #5a7fa8; --c-util: #7c9a5b;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Cascadia Code", Consolas, monospace;
+  --r: 14px; --r-lg: 22px;
+  --shadow: 0 1px 2px rgba(40,30,20,.05), 0 4px 18px rgba(40,30,20,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #262522; --bg-2: #1f1e1c; --surface: #302f2b; --line: #3c3a35; --line-2: #4a4741;
+    --text: #ecebe6; --muted: #a8a49a; --faint: #7d796f;
+    --accent: #d27150; --accent-2: #e0815f; --accent-soft: #46322a;
+    --c-ram: #d98060; --c-vram: #7ea2cc; --c-util: #9dbb7c;
+    --shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 22px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #262522; --bg-2: #1f1e1c; --surface: #302f2b; --line: #3c3a35; --line-2: #4a4741;
+  --text: #ecebe6; --muted: #a8a49a; --faint: #7d796f;
+  --accent: #d27150; --accent-2: #e0815f; --accent-soft: #46322a;
+  --c-ram: #d98060; --c-vram: #7ea2cc; --c-util: #9dbb7c;
+  --shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 22px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font: 14.5px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+a { color: var(--accent); }
+.serif { font-family: var(--serif); font-weight: 400; letter-spacing: -.01em; }
+.btn { border: 1px solid var(--line-2); background: var(--surface); border-radius: 10px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { background: var(--bg-2); }
+.btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-2); }
+.ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }

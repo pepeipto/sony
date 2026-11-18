@@ -1,0 +1,47 @@
+# --- Privado: nunca subir ---
+memoria-sony.json
+panel/ajustes.json
+panel/gasto-claude.json
+panel/estado_conectores.json
+panel/chats/
+panel/adjuntos/
+panel/correo/
+panel/buscador/
+entrenamiento/
+segundo-cerebro-sony/
+skills/ensenar-psicologia/
+*.env
+.env*
+*token*.json
+*credentials*.json
+client_secret*.json
+*.pem
+*.key
+
+# --- Modelos, audio y binarios (muy grandes o se generan) ---
+voz/kokoro/
+voz/voces/
+*.onnx
+*.gguf
+*.bin
+*.mp3
+*.wav
+lanzador/ia-sony
+ventana/sony
+herramientas/texto-png
+
+# --- Copias antiguas y temporales ---
+panel-original-windows/
+*.usb
+*.mac-usb
+*.v1
+*.nuevo
+.subida-github.tgz
+
+# --- Python / sistema ---
+venv/
+__pycache__/
+*.pyc
+*.log
+*.out
+.DS_Store

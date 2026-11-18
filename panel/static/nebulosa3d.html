@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nebulosa IA</title>
+<link rel="apple-touch-icon" href="/static/icono-sony-180.png">
+<link rel="icon" type="image/png" href="/static/icono-sony-192.png">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sony">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#262522">
+
+<link rel="stylesheet" href="/static/tema.css">
+<link rel="stylesheet" href="/static/nebulosa.css">
+<link rel="stylesheet" href="/static/nebulosa3d.css">
+<script type="importmap">
+{ "imports": {
+    "three": "/static/vendor/three/three.module.js",
+    "three/addons/": "/static/vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="escena" aria-label="Mapa 3D de notas del segundo cerebro"></div>
+<div id="n3-rotulos" aria-hidden="true"></div>
+
+<header class="neb-cab">
+  <div class="neb-marca">
+    <h1 class="serif" id="neb-titulo">Nebulosa</h1>
+    <p id="neb-stats">Cargando el segundo cerebro…</p>
+  </div>
+  <nav class="neb-nav">
+    <a href="/" title="Volver al panel">Panel</a>
+    <a href="/chat" title="Ir al chat">Chat</a>
+    <a id="neb-alt" href="/galaxia-espiral">Espiral</a>
+    <a id="neb-2d" href="/nebulosa-2d" title="Vista 2D (sin WebGL, casi sin GPU)">2D</a>
+    <select id="neb-calidad" title="Calidad 3D (se recuerda)" style="background:rgba(255,255,255,.08);color:inherit;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 8px;font:inherit">
+      <option value="ahorro">Ahorro</option><option value="alta">Alta</option><option value="maxima">Máxima</option></select>
+    <script>(function(){var s=document.getElementById('neb-calidad');try{s.value=localStorage.getItem('nebCalidad')||'ahorro';}catch(e){}
+      s.onchange=function(){try{localStorage.setItem('nebCalidad',s.value);}catch(e){}location.reload();};})();</script>
+  </nav>
+</header>
+
+<div class="neb-buscar">
+  <input id="neb-q" type="search" placeholder="Buscar nota…" autocomplete="off" spellcheck="false">
+  <ul id="neb-res" hidden></ul>
+</div>
+
+<aside class="neb-leyenda" id="neb-leyenda" aria-label="Constelaciones"></aside>
+
+<aside class="neb-ficha" id="neb-ficha" hidden>
+  <button class="neb-cerrar" id="neb-cerrar" aria-label="Cerrar">×</button>
+  <div class="neb-ficha-tema" id="f-tema"></div>
+  <h2 class="serif" id="f-titulo"></h2>
+  <div class="neb-ficha-meta" id="f-meta"></div>
+  <div class="neb-ficha-texto" id="f-texto"></div>
+  <h3 id="f-enl-h">Enlaces</h3>
+  <ul class="neb-ficha-enl" id="f-enl"></ul>
+</aside>
+
+<div class="neb-tip" id="neb-tip" hidden></div>
+<div class="n3-aviso" id="n3-aviso" hidden>Modo ligero (calidad Ahorro)</div>
+<div class="n3-info" id="n3-info" title="Coste estimado de esta vista en la GPU">— fps · ≈ — MB VRAM</div>
+<div class="neb-ayuda">Arrastrar: girar · Clic derecho: desplazar · Rueda: zoom · Clic: abrir nota · Doble clic: volar hacia ella</div>
+<script type="module" src="/static/nebulosa3d.js"></script>
+</body>
+</html>

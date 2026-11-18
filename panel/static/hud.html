@@ -1,0 +1,607 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sony</title>
+<style>
+/* Una sola pantalla oscura: núcleo holográfico 3D con anillos en el centro, la conversación en dos paneles debajo, dos botones grandes. */
+:root{
+  --bg:#060b12; --bg2:#0c1622; --panel:rgba(18,34,50,.72); --line:rgba(120,190,230,.18);
+  --fg:#e4eef6; --muted:#8aa0b4;
+  --idle:#5d7a92; --listen:#4fd4ff; --think:#a98bff; --speak:#ffb454;
+  --display:'Avenir Next Condensed','DIN Condensed','Arial Narrow',system-ui,sans-serif;
+  --body:-apple-system,system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 30%,var(--bg2),var(--bg) 70%);background-color:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;overflow-x:hidden}
+.app{min-height:100%;display:flex;flex-direction:column;align-items:center;gap:18px;padding-block:18px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+header{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.name{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.32em;text-transform:uppercase}
+.clock{font-family:var(--display);font-size:18px;color:var(--muted);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.stage{position:relative;width:min(94vw,500px);aspect-ratio:1;max-width:100%}
+canvas{width:100%;height:100%;display:block}
+.state{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:.2em;text-transform:uppercase;color:var(--c,var(--idle));transition:color .4s;text-align:center;min-height:1.3em}
+.panels{width:100%;max-width:760px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.doing{font-size:13.5px;color:var(--muted);text-align:center;min-height:1.4em;margin-top:-10px}
+.links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:760px}
+.chip{display:flex;align-items:center;gap:7px;font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.dot{width:8px;height:8px;border-radius:50%;background:#3ddc97;box-shadow:0 0 8px #3ddc97}
+.chip.off .dot{background:#ffb454;box-shadow:0 0 8px #ffb454}
+.chip.off{color:var(--muted)}
+.today li{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:baseline;line-height:1.4}
+.today .h{font-family:var(--display);font-weight:600;font-size:16px;color:var(--listen);font-variant-numeric:tabular-nums}
+.today .src{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.panels{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0;backdrop-filter:blur(6px)}
+.panel h2{margin:0 0 6px;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.panel p{margin:0;line-height:1.5;min-height:3em}
+.panel.sony h2{color:var(--speak)}
+.buttons{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);background:transparent;border:2px solid var(--line);border-radius:999px;padding:16px 30px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:border-color .2s,background .2s}
+.btn:hover{border-color:var(--listen);background:rgba(79,212,255,.08)}
+.btn:focus-visible{outline:3px solid var(--listen);outline-offset:3px}
+.btn.main{border-color:var(--listen);background:rgba(79,212,255,.12)}
+.btn svg{width:22px;height:22px}
+.note{font-size:12.5px;color:var(--muted);text-align:center;max-width:46ch;line-height:1.5}
+
+/* Ventana de chat aparte */
+.win{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,10,.6);padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.frame{width:min(440px,100%);height:min(620px,100%);background:var(--bg2);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bar b{font-family:var(--display);font-size:18px;letter-spacing:.2em;text-transform:uppercase}
+.close{background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;font-size:15px;padding:6px 12px;cursor:pointer;font-family:var(--body)}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:82%;padding:10px 13px;border-radius:12px;line-height:1.45;overflow-wrap:anywhere}
+.m.yo{align-self:flex-end;background:rgba(79,212,255,.16);border:1px solid rgba(79,212,255,.3)}
+.m.sony{align-self:flex-start;background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.28)}
+form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+input{flex:1;min-width:0;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:12px 16px;font-size:16px;font-family:var(--body)}
+input:focus-visible{outline:2px solid var(--listen)}
+.send{background:var(--listen);color:#04121c;border:none;border-radius:999px;padding:0 18px;font-weight:600;font-size:15px;cursor:pointer}
+
+.sub{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:none}
+.col{width:100%;max-width:760px;display:grid;gap:12px;min-width:0}
+.center{width:100%;max-width:760px;display:flex;flex-direction:column;align-items:center;gap:18px;min-width:0}
+.hud{position:relative;background:rgba(12,26,40,.55);border:1px solid var(--line);padding:12px 14px;min-width:0}
+.hud::before,.hud::after{content:"";position:absolute;width:10px;height:10px;border-color:var(--listen);border-style:solid;opacity:.8}
+.hud::before{top:-1px;left:-1px;border-width:2px 0 0 2px}.hud::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.hud h3{margin:0 0 9px;display:flex;justify-content:space-between;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.26em;text-transform:uppercase;color:var(--listen)}
+.hud h3 i{font-style:normal;color:var(--muted);font-weight:500;letter-spacing:.1em}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:13px;line-height:1.9;color:var(--muted)}
+.row span{display:flex;align-items:center;gap:8px;min-width:0}
+.row em{font-style:normal;color:var(--fg);text-align:right;font-variant-numeric:tabular-nums}
+.row .dot{flex:none}
+.row.off .dot{background:#ffb454;box-shadow:0 0 8px #ffb454}.row.off em{color:#ffb454}
+.meter{height:4px;background:rgba(120,190,230,.12);margin:2px 0 6px;overflow:hidden}
+.meter span{display:block;height:100%;width:10%;background:linear-gradient(90deg,var(--listen),#b8f4ff);box-shadow:0 0 8px var(--listen);transition:width .5s}
+#lvl{transition:width .08s}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:5px;font-size:13px;line-height:1.4}
+.log li{display:grid;grid-template-columns:44px 1fr;gap:8px}
+.log time{color:var(--listen);font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums}
+.log li:first-child{color:var(--fg)}
+.views{display:grid;gap:8px}
+.view{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg);background:rgba(79,212,255,.06);border:1px solid var(--line);padding:9px 12px;text-align:left;cursor:pointer}
+.view::before{content:"›  ";color:var(--listen)}
+.view:hover{border-color:var(--listen);background:rgba(79,212,255,.14)}
+.view:focus-visible{outline:2px solid var(--listen);outline-offset:2px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}.tags span{font-size:12px;padding:3px 9px;border:1px solid var(--line);color:var(--fg)}
+.today{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+@media (min-width:760px){
+  .app{display:grid;grid-template-columns:clamp(180px,21vw,320px) minmax(0,1fr) clamp(180px,21vw,320px);column-gap:clamp(12px,2vw,28px);row-gap:16px;align-items:start;max-width:1600px;margin:0 auto}
+  header{grid-column:1/-1;max-width:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .sub{display:block}.clock{text-align:right}
+  .left{grid-column:1;grid-row:2}.center{grid-column:2;grid-row:2;max-width:none}.right{grid-column:3;grid-row:2}
+  .note{grid-column:2}
+  .stage{width:min(100%,560px,58vh)}
+}
+@media (min-width:760px) and (max-width:1199px){.panels{grid-template-columns:1fr}.hud{padding:10px 11px}.row,.log{font-size:12px}.today li{grid-template-columns:44px 1fr}.today .src{display:none}.btn{font-size:16px;padding:12px 20px}}
+@media (max-width:759px){.left{order:2}.right{order:3}.center{order:1}.note{order:4}}
+.btn.stop{border-color:#ff5c6c;color:#ffb3ba}.btn.stop:hover{background:rgba(255,92,108,.12);border-color:#ff5c6c}
+.ask{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(460px,calc(100% - 32px));background:var(--bg2);border:1px solid var(--speak);box-shadow:0 0 30px rgba(255,180,84,.25);padding:16px 18px;z-index:15;box-sizing:border-box}
+.ask h3{margin:0 0 6px;font-family:var(--display);font-size:14px;letter-spacing:.24em;text-transform:uppercase;color:var(--speak)}
+.ask p{margin:0 0 12px;line-height:1.5}.ask blockquote{margin:0 0 14px;padding:8px 12px;border-left:2px solid var(--speak);color:var(--muted)}
+.ask .acts{display:flex;gap:10px}.ask button{flex:1;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:11px;cursor:pointer;background:transparent;color:var(--fg);border:1px solid var(--line)}
+.ask .yes{border-color:#3ddc97;color:#3ddc97}.ask .yes:hover{background:rgba(61,220,151,.12)}.ask .no:hover{border-color:#ff5c6c;color:#ff5c6c}
+.ask[hidden],.boot[hidden]{display:none}
+.boot{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+.boot pre{font-family:var(--display);font-size:16px;letter-spacing:.14em;color:var(--listen);line-height:1.9;margin:0;padding:0 16px;white-space:pre-wrap}
+.boot.out{opacity:0;pointer-events:none}
+
+.hright{display:flex;align-items:center;gap:14px;justify-content:flex-end}
+.gear{width:40px;height:40px;display:grid;place-items:center;background:transparent;border:1px solid var(--line);border-radius:50%;color:var(--muted);cursor:pointer;transition:color .2s,border-color .2s,transform .4s}
+.gear:hover{color:var(--listen);border-color:var(--listen);transform:rotate(60deg)}.gear:focus-visible{outline:2px solid var(--listen);outline-offset:2px}
+.gear svg{width:20px;height:20px}
+.sets{flex:1;overflow-y:auto;padding:8px 18px 18px;display:grid;gap:4px;align-content:start}
+.set{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.set label,.set .lb{font-size:15px}.set small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.set.dis .lb{color:var(--muted)}
+.set select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;font-family:var(--body)}
+.set input[type=range]{width:130px;accent-color:#4fd4ff}
+.sw{position:relative;width:48px;height:28px;flex:none}.sw input{opacity:0;width:100%;height:100%;margin:0;cursor:pointer;position:absolute;z-index:1}
+.sw input:disabled{cursor:not-allowed}
+.sw span{position:absolute;inset:0;border-radius:999px;background:rgba(120,190,230,.18);transition:background .2s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--fg);transition:transform .2s}
+.sw input:checked+span{background:#4fd4ff}.sw input:checked+span::after{transform:translateX(20px);background:#04121c}
+.sw input:disabled+span{opacity:.45}
+.sw input:focus-visible+span{outline:2px solid var(--listen);outline-offset:2px}
+.connect{background:transparent;border:1px solid #ffb454;color:#ffb454;border-radius:999px;padding:7px 14px;font-weight:600;cursor:pointer;font-family:var(--body)}
+.connect:disabled{opacity:.5;cursor:not-allowed}
+.sec{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--listen);margin-top:14px}
+.win{background:rgba(2,6,10,.55);backdrop-filter:blur(6px)}
+.frame{position:relative;border-radius:0;background:linear-gradient(180deg,rgba(14,30,46,.96),rgba(6,14,22,.97));border:1px solid rgba(79,212,255,.35);box-shadow:0 0 0 1px rgba(79,212,255,.06),0 0 40px rgba(79,212,255,.18),0 30px 80px rgba(0,0,0,.7);overflow:hidden}
+.frame::before,.frame::after{content:"";position:absolute;width:18px;height:18px;border:solid #4fd4ff;z-index:2;pointer-events:none}
+.frame::before{top:-1px;left:-1px;border-width:2px 0 0 2px}.frame::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.frame .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(79,212,255,.035) 0 1px,transparent 1px 3px);z-index:1}
+.bar{position:relative;z-index:2;border-bottom:1px solid rgba(79,212,255,.25);background:rgba(79,212,255,.05)}
+.bar b{display:flex;align-items:center;gap:10px;color:#4fd4ff;font-size:16px;letter-spacing:.3em}
+.bar b::before{content:"";width:8px;height:8px;border-radius:50%;background:#4fd4ff;box-shadow:0 0 10px #4fd4ff;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.25}}
+.bar .tag{font-family:var(--display);font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-left:auto;margin-right:12px}
+.close{border-radius:0;font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;border-color:rgba(79,212,255,.3)}
+.close:hover{border-color:#ff5c6c;color:#ff5c6c}
+.msgs,.sets,form{position:relative;z-index:2}
+.m{border-radius:0;max-width:86%;padding:9px 12px 10px;background:rgba(79,212,255,.05);border:none;border-left:2px solid #4fd4ff;white-space:pre-wrap}
+.m::before{display:block;font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.24em;margin-bottom:3px}
+.m.yo{align-self:flex-end;border-left:none;border-right:2px solid #4fd4ff;text-align:right;background:rgba(79,212,255,.08)}
+.m.yo::before{content:"TÚ";color:#4fd4ff}
+.m.sony{background:rgba(255,180,84,.06);border-left-color:#ffb454}
+.m.sony::before{content:"SONY";color:#ffb454}
+form{border-top:1px solid rgba(79,212,255,.25);background:rgba(79,212,255,.04)}
+input#txt{border-radius:0;border-color:rgba(79,212,255,.3);font-family:var(--body)}
+input#txt::placeholder{color:var(--muted)}
+.send{border-radius:0;font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:transparent;color:#4fd4ff;border:1px solid #4fd4ff;box-shadow:0 0 12px rgba(79,212,255,.25) inset}
+.send:hover{background:rgba(79,212,255,.15)}
+.set{border-bottom-color:rgba(79,212,255,.15)}
+.set select{border-radius:0}.connect{border-radius:0;font-family:var(--display);letter-spacing:.14em;text-transform:uppercase}
+.btn.on{border-color:var(--speak);background:rgba(255,180,84,.12)}
+.tags span.off{color:var(--muted);border-style:dashed}
+.escribe{display:flex;gap:8px;width:100%;max-width:620px;padding:0;border:none;background:none}
+.escribe input{flex:1;min-width:0;background:rgba(6,12,20,.8);color:var(--fg);border:1px solid rgba(79,212,255,.3);border-radius:0;padding:11px 14px;font-size:15px;font-family:var(--body)}
+.escribe .send{padding:0 16px}.escribe .borrar{color:#ffb3ba;border-color:#ff5c6c;box-shadow:none}
+@media (min-width:760px){.stage{width:min(100%,440px,calc(100vh - 400px))!important}.center{gap:10px}.panels{grid-template-columns:1fr 1fr!important;gap:10px}.panel{padding:10px 12px}.panel p{min-height:2.6em;max-height:5.4em;overflow:hidden;font-size:14px}.btn{font-size:15px!important;padding:10px 18px!important}.state{font-size:20px}}
+.today li.vacio{display:block;color:var(--muted);font-size:13px}
+html,body{margin:0}
+[hidden]{display:none!important}
+.clip{background:transparent;border:1px solid rgba(79,212,255,.3);color:#4fd4ff;width:44px;flex:none;cursor:pointer;display:grid;place-items:center}.clip svg{width:20px;height:20px}.clip:hover{background:rgba(79,212,255,.12)}
+.adjs{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:6px;padding:0 12px}.adjs:empty{display:none}.adjs span{font-size:12px;padding:4px 8px;border:1px solid rgba(79,212,255,.3);color:var(--fg)}
+.m img{display:block;max-width:180px;max-height:140px;margin:4px 0;border:1px solid rgba(79,212,255,.3)}.m .doc{display:inline-block;font-size:12px;padding:2px 6px;border:1px dashed rgba(79,212,255,.4);margin:2px 4px 2px 0}
+.frame.drop{outline:2px dashed #4fd4ff;outline-offset:-8px}
+.win[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head><body>
+<div class="app">
+  <header>
+    <div class="name">Sony</div>
+    <div class="sub">Asistente personal · en línea</div>
+    <div class="hright"><div class="clock" id="clock">--:--</div><button class="gear" id="openSet" type="button" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  </header>
+
+  <aside class="col left">
+    <section class="hud">
+      <h3>Voz <i>01</i></h3>
+      <div class="row" id="micR"><span><b class="dot"></b>Micrófono</span><em id="micT">apagado</em></div>
+      <div class="row"><span><b class="dot"></b>Altavoz</span><em>listo</em></div>
+      <div class="row"><span>Nivel de voz</span></div>
+      <div class="meter"><span id="lvl"></span></div>
+    </section>
+    <section class="hud">
+      <h3>Actividad <i>02</i></h3>
+      <ul class="log" id="log"></ul>
+    </section>
+    <section class="hud">
+      <h3>Hoy <i>03</i></h3>
+      <ul class="today" id="hoy"><li class="vacio">Cargando…</li></ul>
+    </section>
+    <section class="hud">
+      <h3>Accesos <i>04</i></h3>
+      <div class="views">
+        <button type="button" class="view" data-open="chat">Chat aparte</button>
+        <button type="button" class="view" data-say="¿Tengo correos importantes?">Correo</button>
+        <button type="button" class="view" data-say="¿Qué tengo hoy en el calendario?">Calendario</button>
+        <button type="button" class="view" data-open="completo">Chat completo</button>
+        <button type="button" class="view" data-open="borrar">Borrar conversación</button>
+      </div>
+    </section>
+  </aside>
+
+  <main class="center">
+    <div class="stage"><canvas id="ring" aria-label="Núcleo holográfico de Sony"></canvas></div>
+    <div class="state" id="state">En espera</div>
+    <div class="doing" id="doing"></div>
+    <form class="escribe" id="escribe"><input id="txt2" placeholder="Escribe a Sony…" autocomplete="off" aria-label="Escribe a Sony"><button class="send" type="submit">Enviar</button><button class="send borrar" type="button" id="borrar2" title="Borrar la conversación y empezar de cero">Borrar</button></form>
+    <section class="panels" aria-live="polite">
+      <div class="panel"><h2>Tú</h2><p id="you"></p></div>
+      <div class="panel sony"><h2>Sony</h2><p id="reply"></p></div>
+    </section>
+    <div class="buttons">
+      <button class="btn main" id="talk" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <span id="talkTxt">Hablar</span>
+      </button>
+      <button class="btn" id="openChat" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>
+        Abrir chat
+      </button>
+      <button class="btn stop" id="stop" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        Parar
+      </button>
+    </div>
+  </main>
+
+  <aside class="col right">
+    <section class="hud">
+      <h3>Conexiones <i>05</i></h3><div id="conex"></div></section>
+    <section class="hud">
+      <h3>Cerebro <i>06</i></h3><div id="cerebro"></div></section>
+    <section class="hud">
+      <h3>Mac Studio <i>07</i></h3>
+      <div class="row"><span>Procesador</span><em id="cpuT">—</em></div><div class="meter"><span id="cpu"></span></div>
+      <div class="row"><span>Memoria</span><em id="memT">—</em></div><div class="meter"><span id="mem"></span></div>
+      <div class="row"><span>Gráfica</span><em id="gpuT">—</em></div><div class="meter"><span id="gpu"></span></div>
+    </section>
+    <section class="hud">
+      <h3>Habilidades <i>08</i></h3>
+      <div class="tags" id="tags"></div>
+    </section>
+    <section class="hud">
+      <h3>Automatizaciones <i>09</i></h3><div id="autos"></div></section>
+  </aside>
+
+  <p class="note">Azul: te escucha. Violeta: piensa. Naranja: habla. Puedes cortarla hablando. Di «borra la conversación» para empezar de cero.</p>
+</div>
+
+<div class="ask" id="ask" role="alertdialog" aria-label="Sony pide permiso" hidden>
+  <h3>Sony pide permiso</h3>
+  <p id="askTit"></p>
+  <blockquote id="askDet"></blockquote>
+  <div class="acts"><button class="yes" id="askYes" type="button">Permitir</button><button class="no" id="askNo" type="button">No permitir</button></div>
+</div>
+<div class="boot" id="boot"><pre id="bootTxt"></pre></div>
+<div class="win" id="setWin" hidden>
+  <div class="frame" role="dialog" aria-label="Ajustes de Sony"><div class="scan"></div>
+    <div class="bar"><b>Ajustes</b><span class="tag">Sistema</span><button class="close" id="closeSet" type="button">Cerrar</button></div>
+    <div class="sets">
+      <div class="sec">Voz</div>
+      <div class="set"><label for="sVoz">Voz de Sony</label><select id="sVoz"></select></div>
+      <div class="set"><label for="sVel">Velocidad al hablar<small>Más a la derecha, más rápido</small></label><input id="sVel" type="range" min="0" max="10" value="5"></div>
+      <div class="set"><label for="sVol">Volumen</label><input id="sVol" type="range" min="1" max="10" value="10"></div>
+      <div class="set"><div class="lb">Escuchar siempre<small>Al abrir Sony te escucha sin pulsar nada. El audio no se guarda.</small></div><span class="sw"><input id="sSiempre" type="checkbox" checked aria-label="Escuchar siempre"><span></span></span></div>
+      <div class="set dis"><div class="lb">Despertarla con «Oye Sony»<small>Aún no disponible</small></div><span class="sw"><input id="sOye" type="checkbox" disabled aria-label="Despertarla con Oye Sony (aún no disponible)"><span></span></span></div>
+      <div class="sec">Conexiones</div>
+      <div class="set"><div class="lb">Correo, Calendario y Drive<small id="sGooTxt">Sin conectar</small></div><button class="connect" id="sGoo" type="button">Conectar</button></div>
+      <div class="set dis"><div class="lb">WhatsApp<small>Aún no disponible (falta el número dedicado)</small></div><button class="connect" id="sWa" type="button" disabled>Pendiente</button></div>
+      <div class="sec">Avisos</div>
+      <div class="set dis"><div class="lb">Buenos días con tu agenda<small>Aún no disponible: necesita el calendario conectado</small></div><span class="sw"><input id="sMan" type="checkbox" disabled aria-label="Buenos días con tu agenda (aún no disponible)"><span></span></span></div>
+      <div class="set dis"><div class="lb">Resumen del correo por la noche<small>Aún no disponible: necesita el correo conectado</small></div><span class="sw"><input id="sRes" type="checkbox" disabled aria-label="Resumen del correo (aún no disponible)"><span></span></span></div>
+      <div class="set"><div class="lb">Pedir permiso antes de enviar algo<small>Siempre activado: correos, mensajes, citas y borrados</small></div><span class="sw"><input id="sPer" type="checkbox" checked disabled aria-label="Pedir permiso antes de enviar (siempre activado)"><span></span></span></div>
+    </div>
+  </div>
+</div>
+<div class="win" id="win" hidden>
+  <div class="frame" role="dialog" aria-label="Chat con Sony"><div class="scan"></div>
+    <div class="bar"><b>Chat</b><span class="tag">Canal abierto</span><button class="close" id="fullChat" type="button" title="Abrir el chat completo con adjuntos, historial y ajustes">Completo</button>&nbsp;<button class="close" id="closeChat" type="button">Cerrar</button></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="adjs" id="adjs"></div>
+    <form id="form"><button class="clip" id="clip" type="button" title="Adjuntar fotos o documentos (PDF, Word, Excel, texto)" aria-label="Adjuntar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.5l-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg></button><input type="file" id="fich" multiple hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,.ppt,.pptx"><input id="txt" placeholder="Escribe a Sony…" autocomplete="off"><button class="send" type="submit">Enviar</button></form>
+  </div>
+</div>
+
+<script src="/static/vendor/three-r128.min.js"></script>
+<script>
+(function(){
+  const css=getComputedStyle(document.documentElement);
+  const COL={idle:css.getPropertyValue('--idle').trim(),listen:css.getPropertyValue('--listen').trim(),think:css.getPropertyValue('--think').trim(),speak:css.getPropertyValue('--speak').trim()};
+  const LABEL={idle:'En espera',listen:'Te escucho…',think:'Pensando…',speak:'Hablando…'};
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cv=document.getElementById('ring');
+  const stateEl=document.getElementById('state');
+  let state='idle',energy=0,spin=0;
+  const DOING={idle:'Vigilando tu correo y tu agenda',listen:'Escuchando tu pregunta',think:'Buscando en tu correo y tu calendario',speak:'Respondiéndote'};
+  const logEl=document.getElementById('log');
+  function log(txt){const li=document.createElement('li');const tm=document.createElement('time');tm.textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});li.append(tm,txt);logEl.prepend(li);while(logEl.children.length>4)logEl.lastChild.remove()}
+  function setState(s){state=s;stateEl.textContent=LABEL[s];stateEl.style.setProperty('--c',COL[s]);const d=document.getElementById('doing');if(d)d.textContent=DOING[s];}
+
+  // Paletas por estado: [principal, secundario]
+  const PAL={idle:['#5b8fc4','#9fd3ff'],listen:['#22c8ff','#b8f4ff'],think:['#8b5cff','#e0b8ff'],speak:['#ff9a2e','#ffe0a8']};
+  const C=k=>PAL[k].map(h=>new THREE.Color(h));
+  let colA=new THREE.Color(PAL.idle[0]),colB=new THREE.Color(PAL.idle[1]);
+
+  const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(40,1,.1,100);cam.position.set(0,0,6.7);
+  function size(){const r=cv.getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix()}
+  addEventListener('resize',size);size();
+
+  const U={uTime:{value:0},uEnergy:{value:0},uA:{value:colA},uB:{value:colB},uPx:{value:renderer.getPixelRatio()}};
+  const NOISE=`
+    vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+    vec4 perm(vec4 x){return mod289(((x*34.)+1.)*x);}vec4 tinv(vec4 r){return 1.79284291400159-.85373472095314*r;}
+    float snoise(vec3 v){const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);
+      vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;
+      vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
+      i=mod289(i);vec4 p=perm(perm(perm(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
+      float n_=.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.*floor(p*ns.z*ns.z);vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);
+      vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
+      vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+      vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+      vec4 nm=tinv(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=nm.x;p1*=nm.y;p2*=nm.z;p3*=nm.w;
+      vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
+      return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}`;
+
+  // 1) Núcleo de partículas (esfera de Fibonacci deformada por ruido)
+  const N=9000,pos=new Float32Array(N*3),rnd=new Float32Array(N);
+  for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),a=i*2.399963;pos[i*3]=Math.cos(a)*r;pos[i*3+1]=y;pos[i*3+2]=Math.sin(a)*r;rnd[i]=Math.random()}
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));pg.setAttribute('rnd',new THREE.BufferAttribute(rnd,1));
+  const pm=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    vertexShader:NOISE+`uniform float uTime,uEnergy,uPx;attribute float rnd;varying float vN;varying float vR;
+      void main(){vec3 p=normalize(position);float n=snoise(p*1.6+vec3(0.,uTime*.35,0.));float n2=snoise(p*4.+uTime*.9);
+        float d=n*(.10+uEnergy*.35)+n2*uEnergy*.12;vec3 q=p*(1.15+d+uEnergy*.06);
+        vec4 mv=modelViewMatrix*vec4(q,1.);gl_Position=projectionMatrix*mv;
+        gl_PointSize=(1.6+rnd*2.2+uEnergy*2.)*uPx*(6./-mv.z);vN=d;vR=rnd;}`,
+    fragmentShader:`uniform vec3 uA,uB;uniform float uEnergy;varying float vN;varying float vR;
+      void main(){float r=length(gl_PointCoord-.5);if(r>.5)discard;float a=smoothstep(.5,0.,r);
+        vec3 c=mix(uA,uB,clamp(vN*2.5+.5,0.,1.));gl_FragColor=vec4(c,a*(.55+vR*.45));}`});
+  const core=new THREE.Points(pg,pm);scene.add(core);
+
+  // 2) Brillo central
+  const gc=document.createElement('canvas');gc.width=gc.height=128;const gx=gc.getContext('2d');
+  const gr=gx.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.25,'rgba(255,255,255,.35)');gr.addColorStop(1,'rgba(255,255,255,0)');
+  gx.fillStyle=gr;gx.fillRect(0,0,128,128);const glowTex=new THREE.CanvasTexture(gc);
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:colA,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  glow.scale.set(3.2,3.2,1);scene.add(glow);
+
+  // 3) Anillos de interfaz: bandas de luz con brillo propio (shader)
+  const hud=new THREE.Group();scene.add(hud);const ringMats=[];
+  const RV=`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+  const RF=`uniform vec3 uCol,uHi;uniform float uTime,uEnergy,uR0,uR1,uSeg,uGap,uMode,uOp,uSpeed;varying vec2 vP;
+    float h(float n){return fract(sin(n*91.7)*43758.5);}
+    void main(){float r=length(vP),a=atan(vP.y,vP.x),f=a/6.28318+.5;
+      float rc=(uR0+uR1)*.5,hw=(uR1-uR0)*.5,w=(r-rc)/hw;
+      float core=exp(-w*w*18.),halo=exp(-w*w*2.5)*.35,prof=core+halo;
+      float s=fract(f*uSeg),id=floor(f*uSeg),edge=.5/uSeg*6.;
+      float seg=smoothstep(0.,.03,s)*smoothstep(1.-uGap,1.-uGap-.03,s);
+      float al=0.;
+      if(uMode<.5){ // banda segmentada con cabeza que recorre
+        float head=pow(max(0.,cos(a-uTime*uSpeed)),60.);al=prof*seg*(.55+head*2.5);}
+      else if(uMode<1.5){ // trazos de datos que parpadean
+        float fl=.35+.65*step(.45,h(id+floor(uTime*2.+h(id)*4.)));al=core*1.4*seg*fl;}
+      else if(uMode<2.5){ // marcas de escala, una larga cada 10
+        float big=step(mod(id,10.),.5);float len=mix(.45,1.,big);
+        float rr=(r-uR0)/(uR1-uR0);al=seg*step(rr,len)*(.5+big*.6)*1.3;}
+      else { // arco cometa con cola
+        float t=fract(f);float tail=smoothstep(0.,.7,t)*step(t,.7);float hd=exp(-pow((t-.7)*60.,2.));
+        al=prof*(tail*.9+hd*3.);}
+      vec3 c=mix(uCol,uHi,clamp(core*.9,0.,1.));
+      gl_FragColor=vec4(c,al*uOp*(.75+uEnergy*.8));}`;
+  function ring(r0,r1,mode,seg,gap,op,speed,tilt){
+    const m=new THREE.ShaderMaterial({vertexShader:RV,fragmentShader:RF,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,
+      uniforms:{uCol:{value:colA},uHi:{value:colB},uTime:U.uTime,uEnergy:U.uEnergy,uR0:{value:r0},uR1:{value:r1},uSeg:{value:seg},uGap:{value:gap},uMode:{value:mode},uOp:{value:op},uSpeed:{value:speed}}});
+    ringMats.push(m);const pad=(r1-r0)*.6;
+    const me=new THREE.Mesh(new THREE.RingGeometry(r0-pad,r1+pad,256,1),m);
+    if(tilt){me.rotation.x=tilt[0];me.rotation.y=tilt[1]}
+    const g=new THREE.Group();g.add(me);return g;}
+  const rings=[
+    [ring(1.70,1.80,0,3,.22,1.0,1.4),.22],            // banda principal en 3 arcos
+    [ring(1.88,1.91,1,96,.45,.9,0),-.35],            // trazos de datos
+    [ring(2.02,2.12,2,180,.72,.7,0),.06],             // escala fina
+    [ring(2.26,2.34,3,1,0,1.0,0),.5],                 // arco cometa
+    [ring(2.42,2.45,0,6,.6,.55,-1.),-.12],            // borde exterior discontinuo
+    [ring(1.52,1.57,3,1,0,.8,0,[1.2,.35]),.9],        // órbita inclinada 1
+    [ring(1.60,1.64,3,1,0,.6,0,[-1.05,.55]),-.7]      // órbita inclinada 2
+  ];
+  rings.forEach(([o])=>hud.add(o));
+  // los anillos inclinados giran sobre su propio plano
+  rings.forEach(([o])=>{const me=o.children[0];o.userData.me=me});
+
+  // 4) Polvo flotante alrededor
+  const D=600,dp=new Float32Array(D*3);for(let i=0;i<D;i++){const r=2.4+Math.random()*1.6,a=Math.random()*6.283,b=Math.acos(2*Math.random()-1);
+    dp[i*3]=r*Math.sin(b)*Math.cos(a);dp[i*3+1]=r*Math.sin(b)*Math.sin(a);dp[i*3+2]=r*Math.cos(b)}
+  const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+  const dm=new THREE.PointsMaterial({color:colB,size:.025,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false});
+  const dust=new THREE.Points(dg,dm);scene.add(dust);
+
+  // Inclinación al mover el ratón o el dedo
+  let tx=0,ty=0,mx=0,my=0;
+  addEventListener('pointermove',e=>{tx=(e.clientX/innerWidth-.5)*.5;ty=(e.clientY/innerHeight-.5)*.4});
+
+  const lvlEl=document.getElementById('lvl');
+  const clock3=new THREE.Clock();let last=0;
+  function frame(){
+    const dt=Math.min(clock3.getDelta(),.05),t=clock3.elapsedTime;
+    const want=state==='idle'?.08+.04*Math.sin(t*1.2):state==='think'?.3:.45+.5*Math.abs(Math.sin(t*6.8)*Math.sin(t*2.9+1));
+    energy+=(want-energy)*.12;
+    const [a,b]=C(state);colA.lerp(a,.05);colB.lerp(b,.05);
+    U.uTime.value=t;U.uEnergy.value=energy;
+    glow.material.color.copy(colA);glow.scale.setScalar(2.6+energy*1.6);glow.material.opacity=.35+energy*.5;
+    const sp=state==='think'?3:state==='idle'?.6:1.2;spin+=(sp-spin)*.04;
+    rings.forEach(([o,s])=>o.userData.me.rotateZ(s*spin*dt));
+    core.rotation.y+=dt*.15*spin;dust.rotation.y-=dt*.03*spin;dm.color.copy(colB);
+    mx+=(tx-mx)*.05;my+=(ty-my)*.05;scene.rotation.y=mx;scene.rotation.x=my+Math.sin(t*.3)*.05;
+    renderer.render(scene,cam);
+    if(!reduce)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if(reduce)setInterval(frame,250);
+
+  // ======== Sony real (18/11): esta pantalla va dentro de la ventana de Sony y lee el estado de la página que la contiene ========
+  // P = la página del chat (misma web, 127.0.0.1:8099): Voz, S (estado), enviar, pararGeneracion, responderPermiso, borrarConversacion, Nucleo.
+  const P = window.parent;
+  const $ = id => document.getElementById(id);
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const api = async u => { const r = await fetch(u, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); };
+  const hhmm = t => new Date(t).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  function fila(cont, nombre, valor, ok = true, punto = true) {
+    const d = document.createElement('div'); d.className = 'row' + (ok ? '' : ' off');
+    const s = document.createElement('span'); if (punto) { const b = document.createElement('b'); b.className = 'dot'; s.appendChild(b); } s.appendChild(document.createTextNode(nombre));
+    const e = document.createElement('em'); e.textContent = valor; d.append(s, e); cont.appendChild(d);
+  }
+  function corto(t, n) { t = (t || '').replace(/```[\s\S]*?```/g, ' ').replace(/[#*_`>|]/g, '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n) + '…' : t; }
+
+  // reloj
+  function tick() { $('clock').textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); }
+  tick(); setInterval(tick, 10000);
+
+  // ---- estado real de la voz → colores del núcleo ----
+  function leerEstado() {
+    const e = P.Voz?.estado;
+    if (e === 'hablando') return 'speak';
+    if (e === 'pensando' || e === 'transcribiendo' || P.S?.generando) return 'think';
+    if (P.Voz?.activo && (e === 'escuchando' || e === 'oyendo')) return 'listen';
+    return 'idle';
+  }
+  const DOING2 = { idle: 'En espera: háblame cuando quieras', listen: 'Escuchándote', think: 'Pensando la respuesta', speak: 'Respondiéndote' };
+  let pasosVistos = new Set(), permisoMostrado = null, ultimoHilo = null;
+  function vivo() { const ms = P.S?.hilo?.mensajes || [], r = ms[ms.length - 1]; return r && r.vivo ? { r, i: ms.length - 1 } : null; }
+  function pulso() {
+    if (document.hidden || P.Nucleo?.vista !== 'nucleo') return;  // sin gastar si no se ve
+    const s = leerEstado(); if (s !== state) setState(s);
+    const v = vivo(), paso = v && (v.r.pasos || []).slice().reverse().find(p => p.estado === 'en_curso' || p.estado === 'permiso');
+    $('doing').textContent = paso ? (paso.estado === 'permiso' ? 'Esperando tu permiso: ' : 'Ahora: ') + (paso.titulo || paso.herramienta) : DOING2[state];
+    // Tú / Sony
+    const ms = P.S?.hilo?.mensajes || [];
+    const u = [...ms].reverse().find(m => m.rol === 'user'), r = [...ms].reverse().find(m => m.rol === 'ia');
+    $('you').textContent = u ? corto(u.texto, 220) : 'Háblame o pulsa «Hablar».';
+    $('reply').textContent = r ? corto(r.texto || r.error, 320) : '';
+    // botones
+    const on = !!P.Voz?.activo; $('talkTxt').textContent = on ? 'Dejar de escuchar' : 'Hablar'; $('talk').classList.toggle('on', on);
+    $('stop').hidden = !(P.S?.generando || P.Voz?.estado === 'hablando');
+    // voz
+    $('micT').textContent = on ? 'escuchando' : 'apagado'; $('micR').classList.toggle('off', !on);
+    $('lvl').style.width = (on ? Math.min(100, Math.sqrt(P.Voz?.nivel || 0) * 300) : 2) + '%';
+    // actividad: pasos de herramientas que terminan
+    if (P.S?.hilo?.id !== ultimoHilo) { ultimoHilo = P.S?.hilo?.id; pasosVistos = new Set((P.S?.hilo?.mensajes || []).flatMap(m => (m.pasos || []).map(p => p.id + p.estado))); }
+    for (const m of ms) for (const p of (m.pasos || [])) {
+      const k = p.id + p.estado; if (pasosVistos.has(k)) continue; pasosVistos.add(k);
+      const t = { hecho: '✓', denegado: '✕ no', error: '⚠', bloqueado: '⛔' }[p.estado]; if (t) log(`${p.titulo || p.herramienta} ${t}`);
+    }
+    // tarjeta de permiso
+    const pp = v && (v.r.pasos || []).find(p => p.estado === 'permiso');
+    if (pp && permisoMostrado !== pp.id) {
+      permisoMostrado = pp.id; $('askTit').textContent = 'Quiere: ' + (pp.titulo || pp.herramienta); $('askDet').textContent = corto(pp.detalle, 400);
+      $('ask').hidden = false;
+      $('askYes').onclick = () => { $('ask').hidden = true; P.responderPermiso(pp.id, 'una', v.i); log('Permitido: ' + (pp.titulo || pp.herramienta)); };
+      $('askNo').onclick = () => { $('ask').hidden = true; P.responderPermiso(pp.id, 'denegar', v.i); log('No permitido: ' + (pp.titulo || pp.herramienta)); };
+    }
+    if (!pp && !$('ask').hidden) $('ask').hidden = true;
+    if (!$('win').hidden) pintarChat();
+  }
+  setInterval(pulso, 150);
+
+  // ---- botones ----
+  $('talk').onclick = () => P.Voz.iniciar();
+  $('stop').onclick = () => { try { P.pararGeneracion?.(); } catch {} P.Voz?.callar(); log('Parado por ti'); };
+  document.querySelectorAll('.view').forEach(b => b.onclick = () => {
+    if (b.dataset.open === 'chat') return abrirChat();
+    if (b.dataset.open === 'completo') return P.Nucleo.chat(true);
+    if (b.dataset.open === 'borrar') { P.borrarConversacion(); log('Conversación borrada'); return; }
+    if (b.dataset.say) P.enviar(b.dataset.say);
+  });
+
+  // ---- chat aparte (la misma conversación de Sony) ----
+  const win = $('win'), msgs = $('msgs'), txt = $('txt'); let firma = '';
+  function pintarChat() {
+    const ms = (P.S?.hilo?.mensajes || []).slice(-40);
+    const f = (P.S?.hilo?.id || '') + ':' + ms.length + ':' + ms.map(m => (m.texto || m.error || '').length + '/' + (m.adjuntos || []).length).join(',');
+    if (f === firma) return; firma = f;
+    msgs.replaceChildren(...ms.map(m => {
+      const d = document.createElement('div'); d.className = 'm ' + (m.rol === 'user' ? 'yo' : 'sony');
+      for (const a of (m.adjuntos || [])) {
+        if (a.tipo === 'imagen' && /^[\w-]+$/.test(a.id || '')) { const i = document.createElement('img'); i.src = '/api/adjuntos/' + a.id; i.alt = a.nombre || 'foto'; d.appendChild(i); }
+        else { const s = document.createElement('span'); s.className = 'doc'; s.textContent = '📄 ' + (a.nombre || 'documento'); d.appendChild(s); }
+      }
+      d.appendChild(document.createTextNode(corto(m.texto || m.error || (m.vivo ? '…' : ''), 2000))); return d;
+    }));
+    if (!ms.length) { const d = document.createElement('div'); d.className = 'm sony'; d.textContent = 'Escríbeme lo que quieras.'; msgs.appendChild(d); }
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function abrirChat() { win.hidden = false; firma = ''; pintarChat(); txt.focus(); }
+  $('openChat').onclick = abrirChat;
+  $('closeChat').onclick = () => { win.hidden = true; };
+  $('fullChat').onclick = () => { win.hidden = true; P.Nucleo.chat(true); };
+  win.addEventListener('click', e => { if (e.target === win) win.hidden = true; });
+  $('escribe').addEventListener('submit', e => { e.preventDefault(); const v = $('txt2').value.trim(); if (!v) return; $('txt2').value = ''; P.enviar(v); });
+  $('borrar2').onclick = () => { P.borrarConversacion(); log('Conversación borrada'); };
+  $('form').addEventListener('submit', e => { e.preventDefault(); const v = txt.value.trim(); if (!v && !(P.S.adjuntos || []).length) return; txt.value = ''; P.enviar(v); });
+  // adjuntos: el clip o arrastrar encima. Las fotos las ve Sony (visión del Qwen) y los documentos los lee (PDF, Word, Excel, texto).
+  function pintarAdjs() {
+    const L = P.S.adjuntos || [];
+    $('adjs').replaceChildren(...L.map(a => { const s = document.createElement('span'); s.textContent = (a.subiendo ? '⏳ ' : a.tipo === 'imagen' ? '🖼 ' : '📄 ') + (a.nombre || ''); return s; }));
+  }
+  setInterval(() => { if (!win.hidden) pintarAdjs(); }, 300);
+  $('clip').onclick = () => $('fich').click();
+  $('fich').onchange = e => { if (e.target.files.length) P.subirArchivos([...e.target.files]); e.target.value = ''; };
+  const fr = win.querySelector('.frame');
+  fr.addEventListener('dragover', e => { e.preventDefault(); fr.classList.add('drop'); });
+  fr.addEventListener('dragleave', () => fr.classList.remove('drop'));
+  fr.addEventListener('drop', e => { e.preventDefault(); fr.classList.remove('drop'); if (e.dataTransfer.files.length) P.subirArchivos([...e.dataTransfer.files]); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { if (!win.hidden) win.hidden = true; else P.Voz?.callar(); } });
+
+  // ---- paneles con datos reales (nunca inventados) ----
+  async function conexiones() {
+    let d; try { d = await api('/api/nucleo/estado'); } catch { return; }
+    const C = $('conex'); C.replaceChildren(); for (const c of d.conexiones) fila(C, c.nombre, c.ok ? (c.detalle || 'conectado') : 'sin conectar', c.ok);
+    const H = $('hoy'); const items = [];
+    for (const x of d.hoy) { const li = document.createElement('li'); for (const [cls, t] of [['h', x.hora], ['', x.texto], ['src', x.fuente]]) { const s = document.createElement('span'); if (cls) s.className = cls; s.textContent = t; li.appendChild(s); } items.push(li); }
+    if (!items.length) { const li = document.createElement('li'); li.className = 'vacio'; li.textContent = d.aviso ? d.aviso + ': conéctalo para ver aquí tus citas.' : 'Nada para hoy.'; items.push(li); }
+    H.replaceChildren(...items);
+    const g = d.conexiones.find(c => c.nombre === 'Calendario')?.ok, m = d.conexiones.find(c => c.nombre === 'Correo')?.ok;
+    const T = $('tags'); T.replaceChildren();
+    for (const [n, ok] of [['Segundo cerebro', true], ['Buscar en internet', true], ['Archivos', true], ['Ver la pantalla', true], ['Correo', m], ['Agenda', g], ['Drive', g], ['WhatsApp', false]]) {
+      const s = document.createElement('span'); s.textContent = n + (ok ? '' : ' · sin conectar'); if (!ok) s.className = 'off'; T.appendChild(s);
+    }
+    return d;
+  }
+  function cerebro() {
+    const C = $('cerebro'); C.replaceChildren();
+    fila(C, 'Piensa con', 'Qwen 27B · en tu Mac', true, false);
+    fila(C, 'Oye con', 'Whisper · en tu Mac', true, false);
+    fila(C, 'Habla con', 'Piper · ' + ((P.S?.ajustes?.voz?.nombre || 'Davefx (España)').replace(/\s*\(.*\)/, '')), true, false);
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const n = (P.S?.hilos || []).filter(h => (h.actualizado || 0) * 1000 >= hoy.getTime()).length;
+    fila(C, 'Hoy', n + (n === 1 ? ' conversación' : ' conversaciones'), true, false);
+    const A = $('autos'); A.replaceChildren(); const pr = (P.S?.programados || []).filter(p => !p.cada_min);
+    if (!pr.length) fila(A, 'Ninguna todavía', 'menú «Programados»', true, false);
+    for (const p of pr.slice(0, 5)) fila(A, p.titulo || p.nombre || 'Tarea', p.hora || '', p.activa !== false, false);
+  }
+  async function mac() {
+    if (document.hidden || P.Nucleo?.vista !== 'nucleo') return;
+    try { const d = await api('/api/nucleo/mac'); for (const k of ['cpu', 'mem', 'gpu']) { const v = d[k]; $(k).style.width = (v == null ? 0 : v) + '%'; $(k + 'T').textContent = v == null ? '—' : Math.round(v) + ' %'; } } catch {}
+  }
+  conexiones(); cerebro(); mac();
+  setInterval(conexiones, 60000); setInterval(cerebro, 5000); setInterval(mac, 2500);
+
+  // ---- arranque animado (una vez por cada vez que abres Sony) ----
+  async function boot() {
+    const b = $('boot'), t = $('bootTxt');
+    let visto = false; try { visto = P.sessionStorage.getItem('sonyArranque') === '1'; P.sessionStorage.setItem('sonyArranque', '1'); } catch {}
+    if (reduce || visto) { b.hidden = true; return; }
+    let est = {}, d = null; try { est = await api('/api/chat/estado'); } catch {} try { d = await api('/api/nucleo/estado'); } catch {}
+    const con = d ? d.conexiones.filter(c => c.ok).map(c => c.nombre) : [];
+    const L = ['SONY · INICIANDO', 'Micrófono ........ ' + (P.Voz?.activo ? 'escuchando' : 'listo'), 'Voz en español ... lista',
+      'Cerebro local .... ' + (est.estado === 'listo' ? 'listo' : 'cargando'),
+      'Conexiones ....... ' + (con.length ? con.join(', ') : 'sin conectar todavía'), 'Todo listo, ' + (P.S?.ajustes?.nombre || 'el usuario') + '.'];
+    for (const l of L) { t.textContent += l + '\n'; await wait(240); } await wait(450); b.classList.add('out'); await wait(650); b.hidden = true;
+  }
+  // ---- ventana de ajustes (los ajustes reales de Sony; lo que aún no existe sale desactivado y lo dice) ----
+  const setWin = $('setWin');
+  async function abrirAjustes() {
+    const a = P.S?.ajustes || {}, v = a.voz || {};
+    try { const vs = await api('/api/voz/voces'); $('sVoz').replaceChildren(...vs.map(x => { const o = document.createElement('option'); o.textContent = x.nombre; o.selected = x.nombre === (v.nombre || 'Davefx (España)'); return o; })); } catch {}
+    $('sVel').value = v.velocidad ?? 5; $('sVol').value = v.volumen ?? 10; $('sSiempre').checked = v.siempre !== false;
+    let d = null; try { d = await api('/api/nucleo/estado'); } catch {}
+    const g = d?.conexiones.find(c => c.nombre === 'Calendario')?.ok;
+    $('sGooTxt').textContent = g ? 'Conectados' : 'Sin conectar'; $('sGoo').textContent = g ? 'Ver' : 'Conectar';
+    setWin.hidden = false;
+  }
+  const guardarVoz = c => P.guardarAj({ voz: { ...(P.S.ajustes.voz || {}), ...c } });
+  $('openSet').onclick = abrirAjustes;
+  $('closeSet').onclick = () => { setWin.hidden = true; };
+  setWin.addEventListener('click', e => { if (e.target === setWin) setWin.hidden = true; });
+  $('sVoz').onchange = async e => { await guardarVoz({ nombre: e.target.value }); P.Voz.leer('Hola el usuario, esta es mi voz.'); };
+  $('sVel').onchange = async e => { await guardarVoz({ velocidad: +e.target.value }); P.Voz.leer('Así hablo ahora.'); };
+  $('sVol').onchange = async e => { await guardarVoz({ volumen: +e.target.value }); P.Voz.leer('Así de alto.'); };
+  $('sSiempre').onchange = e => guardarVoz({ siempre: e.target.checked });
+  $('sGoo').onclick = () => { setWin.hidden = true; P.Nucleo.mostrar(false); P.abrirAjustes('Conectores'); };
+  boot();
+})();
+</script>

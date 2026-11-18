@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IA Sony</title>
+<link rel="apple-touch-icon" href="/static/icono-sony-180.png">
+<link rel="icon" type="image/png" href="/static/icono-sony-192.png">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sony">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#262522">
+
+<link rel="stylesheet" href="/static/tema.css?v=202611182200">
+<link rel="stylesheet" href="/static/temas-extra.css?v=202611182200">
+<link rel="stylesheet" href="/static/chat.css?v=202611182200">
+<link rel="stylesheet" href="/static/movil.css?v=202611182200">
+<link rel="stylesheet" href="/static/nucleo.css?v=202611182400">
+</head>
+<body>
+<div id="app">
+  <!-- Barra lateral -->
+  <aside id="side">
+    <div class="side-top">
+      <button class="icon-btn" id="btnSide" title="Ocultar barra (Ctrl+B)"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+      <span class="brand serif">IA Sony</span>
+    </div>
+    <nav class="side-nav">
+      <button class="nav-item accent" id="btnNuevo"><span class="plus-circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></span>Nuevo chat</button>
+      <button class="nav-item" id="btnBuscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Buscar<kbd>Ctrl K</kbd></button>
+      <button class="nav-item" data-vista="proyectos"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2h7.5A2.5 2.5 0 0 1 21 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>Proyectos</button>
+      <button class="nav-item" data-vista="programados"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Programados</button>
+      <a class="nav-item" href="/galaxia-espiral" style="text-decoration:none" title="Galaxia del segundo cerebro"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="5" cy="7" r="1.3"/><circle cx="19" cy="6" r="1.3"/><circle cx="17" cy="18" r="1.3"/><circle cx="6" cy="17" r="1.3"/><path d="M6 8l4.5 3M18 7l-4.5 3.5M16 17l-2.5-3.5M7 16l3.5-2.5"/></svg>Galaxia</a>
+      <a class="nav-item" href="/" style="text-decoration:none" title="Panel: memoria del Mac y modelo"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 15l3-4 3 2 4-6"/></svg>Panel</a>
+      <a class="nav-item" href="/static/iconos.html" style="text-decoration:none" title="Iconos de Sony para elegir"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="11" r="3"/></svg>Iconos</a>
+      <button class="nav-item" data-vista="artefactos"><svg class="ico" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>Artefactos</button>
+    </nav>
+    <div class="side-scroll">
+      <div class="side-sec" id="secFijados"><div class="side-h">Fijados</div><div id="listaFijados"></div></div>
+      <div class="side-sec"><div class="side-h">Recientes</div><div id="listaRecientes"></div></div>
+    </div>
+    <div class="side-foot">
+      <button class="user" id="btnUser"><span class="avatar" id="avatar">C</span><span class="uname" id="uname">el usuario</span>
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+  </aside>
+
+  <!-- Zona principal -->
+  <main id="main">
+    <header id="top">
+      <button class="icon-btn hidden" id="btnSide2" title="Mostrar barra (Ctrl+B)"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+      <div id="tituloHilo" class="titulo-hilo"></div>
+      <div class="top-right">
+        <button class="btn small" id="btnNucleo" title="Volver a la pantalla del núcleo" onclick="Nucleo.mostrar(true)">◉ Núcleo</button>
+        <button class="btn small" id="btnChatNuevo" title="Volver al chat nuevo" onclick="Nucleo.chat(true)">Chat nuevo</button>
+        <button class="btn small" id="btnBorrarConv" title="Borra esta conversación y empieza de cero (también puedes decir «borra la conversación»)">🧹 Borrar conversación</button>
+        <span id="estadoModelo" class="pill">Modelo apagado</span>
+        <button class="btn small" id="btnModelo">Cargar modelo</button>
+        <button class="icon-btn" id="btnPanelDer" title="Panel lateral"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg></button>
+        <button class="icon-btn" id="btnMenuHilo" title="Opciones del chat"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>
+      </div>
+    </header>
+
+    <section id="vistaChat">
+      <div id="scroll">
+        <div id="bienvenida">
+          <div class="saludo"><span class="marca"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="5" /><circle cx="16" cy="16" r="11" fill="none" stroke-width="2"/></svg></span><h1 class="serif" id="saludo">Buenas tardes, el usuario</h1></div>
+          <p class="soy">Soy Sony, tu asistente.</p>
+        </div>
+        <div id="mensajes"></div>
+      </div>
+      <div id="composerWrap">
+        <div id="composer">
+          <div id="adjPrev"></div>
+          <textarea id="entrada" rows="1" enterkeyhint="send" autocapitalize="sentences" placeholder="¿En qué puedo ayudarte hoy?"></textarea>
+          <div class="comp-bar">
+            <button class="icon-btn round" id="btnAdj" title="Adjuntar archivos"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button class="icon-btn round" id="btnHerr" title="Opciones"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+            <button class="chip-agente" id="btnAgente" title="Activar el agente Hermes (usa herramientas con tu permiso)">🛠 Agente</button>
+            <div class="sp"></div>
+            <button class="icon-btn round" id="btnLiberar" title="⏏ Liberar la memoria (descargar el Qwen local)">⏏</button>
+            <button class="model-sel" id="btnSelModelo"><span id="nombreModelo">Qwen 27B</span><svg class="ico" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
+            <button class="icon-btn round" id="btnVoz" title="Modo voz"><svg class="ico" viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button>
+            <button class="send" id="btnEnviar" title="Enviar (Enter)"><svg class="ico" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+          </div>
+          <div id="slashMenu" class="menu hidden"></div>
+        </div>
+        <div class="aviso">La IA puede equivocarse. Funciona solo en este PC.</div>
+      </div>
+    </section>
+
+    <section id="vistaLista" class="hidden"></section>
+  </main>
+
+  <!-- Panel derecho -->
+  <aside id="der" class="hidden">
+    <div id="derResize"></div>
+    <div class="der-head">
+      <div class="tabs" id="derTabs">
+        <button data-tab="artefacto" class="on">Artefacto</button>
+        <button data-tab="archivos">Archivos</button>
+        <button data-tab="biblioteca">Biblioteca</button>
+      </div>
+      <button class="icon-btn" id="btnCerrarDer" title="Cerrar"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="derBody"></div>
+  </aside>
+</div>
+
+<input type="file" id="fileIn" multiple hidden>
+<div id="modal" class="hidden"><div class="modal-card" id="modalCard"></div></div>
+<div id="toast" class="hidden"></div>
+<div id="menuFlot" class="menu hidden"></div>
+<div id="drop" class="hidden"><div>Suelta los archivos para adjuntarlos</div></div>
+
+<script src="/static/chat.js?v=202611182200"></script>
+<script src="/static/voz.js?v=202611182200"></script>
+<script src="/static/nucleo.js?v=202611182400"></script>
+<script>window.S = S; window.Voz = Voz; Nucleo.iniciar();</script>
+</body>
+</html>

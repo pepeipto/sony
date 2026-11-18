@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel IA</title>
+<link rel="apple-touch-icon" href="/static/icono-sony-180.png">
+<link rel="icon" type="image/png" href="/static/icono-sony-192.png">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sony">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#262522">
+
+<link rel="stylesheet" href="/static/tema.css">
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+  header h1 { font-size: 28px; margin: 0; }
+  nav { margin-left: auto; display: flex; gap: 6px; }
+  nav a { text-decoration: none; color: var(--muted); padding: 6px 12px; border-radius: 10px; }
+  nav a:hover { background: var(--bg-2); color: var(--text); }
+  nav a.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; box-shadow: var(--shadow); }
+  .lbl { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .val { font-family: var(--serif); font-size: 30px; margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+  .val small { font-size: 16px; color: var(--muted); }
+  .sub { color: var(--muted); font-size: 13px; }
+  .bar { height: 6px; background: var(--bg-2); border-radius: 6px; margin-top: 10px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 6px; transition: width .4s; }
+  .wide { margin-top: 14px; }
+  .chart-head { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .chart-head h2 { font-size: 19px; margin: 0; }
+  .legend { display: flex; gap: 14px; margin-left: auto; color: var(--muted); font-size: 13px; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  canvas { width: 100%; height: 260px; display: block; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 12.5px; }
+  td.r, th.r { text-align: right; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 13px; background: var(--bg-2); color: var(--muted); }
+  .pill.on { background: var(--accent-soft); color: var(--accent); }
+  .empty { color: var(--faint); padding: 12px 6px; }
+  @media (max-width: 600px) { header { flex-wrap: wrap; } nav { margin-left: 0; } }
+</style>
+<style>/* mac-oculto: en el Mac no hay gráfica aparte ni SAI */ #saiCard, .card:has(.dot[style*="--c-vram"]), table:has(#procs) { display: none !important; }</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="serif">Panel IA</h1>
+    <span class="sub" id="gpuname">—</span>
+    <nav><a href="/" class="on">Memoria</a><a href="/chat">Chat</a><a href="/galaxia-espiral">Galaxia</a></nav>
+  </header>
+
+  <div class="grid">
+    <div class="card"><div class="lbl"><i class="dot" style="background:var(--c-ram)"></i>RAM</div>
+      <div class="val" id="ram">—</div><div class="sub" id="ramsub"></div><div class="bar"><i id="rambar" style="background:var(--c-ram)"></i></div></div>
+    <div class="card"><div class="lbl"><i class="dot" style="background:var(--c-vram)"></i>VRAM</div>
+      <div class="val" id="vram">—</div><div class="sub" id="vramsub"></div><div class="bar"><i id="vrambar" style="background:var(--c-vram)"></i></div></div>
+    <div class="card"><div class="lbl"><i class="dot" style="background:var(--c-util)"></i>Uso de GPU</div>
+      <div class="val" id="util">—</div><div class="sub" id="utilsub"></div><div class="bar"><i id="utilbar" style="background:var(--c-util)"></i></div></div>
+    <div class="card"><div class="lbl">Memoria comprometida</div>
+      <div class="val" id="commit">—</div><div class="sub" id="commitsub">RAM + paginación</div><div class="bar"><i id="commitbar" style="background:var(--faint)"></i></div></div>
+    <div class="card"><div class="lbl">Modelo activo</div>
+      <div class="val" style="font-size:22px" id="model">—</div><div class="sub">llama-server en 127.0.0.1:8080</div></div>
+    <div class="card" id="saiCard"><div class="lbl">🔋 SAI <span id="saiEstado" style="float:right"></span></div>
+      <div class="val" id="saiPct">—</div><div class="sub" id="saiSub">Phasak PH 9230 · comprobando…</div><div class="bar"><i id="saiBar" style="background:var(--ok)"></i></div>
+      <div class="sub" style="margin-top:8px">Apagar el PC al <input id="saiApag" type="number" min="15" max="80" step="5" style="width:56px"> % en batería</div>
+      <div class="sub" id="saiHist" style="margin-top:6px;max-height:70px;overflow:auto"></div></div>
+  </div>
+
+  <div class="card wide">
+    <div class="chart-head"><h2 class="serif">Últimos 10 minutos</h2>
+      <div class="legend"><span><i class="dot" style="background:var(--c-ram)"></i>RAM %</span><span><i class="dot" style="background:var(--c-vram)"></i>VRAM %</span><span><i class="dot" style="background:var(--c-util)"></i>GPU %</span></div></div>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="card wide">
+    <div class="chart-head"><h2 class="serif">Procesos en la GPU (CUDA)</h2></div>
+    <table><thead><tr><th>Proceso</th><th>PID</th><th class="r">VRAM</th></tr></thead><tbody id="procs"></tbody></table>
+  </div>
+</div>
+<script>
+// Tarjeta del SAI (lo que Windows ve por USB-HID: batería, autonomía y si está en red o en batería)
+async function sai() {
+  try {
+    const d = await (await fetch('/api/sai/estado')).json(), g = id => document.getElementById(id);
+    if (!d.ok) { g('saiSub').textContent = 'No veo el SAI por USB'; return; }
+    g('saiPct').textContent = d.pct + ' %'; g('saiBar').style.width = d.pct + '%';
+    g('saiBar').style.background = d.en_bateria ? 'var(--warn)' : 'var(--ok)';
+    g('saiEstado').textContent = d.en_bateria ? '⚡ en batería' : '🔌 en red';
+    g('saiSub').textContent = `Autonomía: ${d.min ? d.min + ' min' : '—'} · ${d.modelo}`;
+    const a = g('saiApag'); if (document.activeElement !== a) a.value = d.apagado_pct;
+    a.onchange = () => fetch('/api/sai/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apagado_pct: +a.value }) });
+    g('saiHist').innerHTML = (d.historial || []).map(e => `${e.t.slice(5, 16)} · ${{ corte: 'Corte de luz', vuelve_luz: 'Vuelve la luz', apagado: 'Apagado por batería' }[e.evento] || e.evento}${e.pct != null ? ' (' + e.pct + ' %)' : ''}`).join('<br>') || 'Sin cortes registrados';
+  } catch {}
+}
+sai(); setInterval(sai, 15000);
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 1) => v.toFixed(d).replace('.', ',');
+let last = null;
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function draw(hist, ramTot, vramTot) {
+  const c = $('chart'), dpr = devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const g = c.getContext('2d'); g.scale(dpr, dpr); g.clearRect(0, 0, w, h);
+  const L = 34, R = 8, T = 8, B = 22, pw = w - L - R, ph = h - T - B;
+  g.font = '12px ' + css('--sans'); g.fillStyle = css('--faint'); g.strokeStyle = css('--line'); g.lineWidth = 1;
+  for (let p = 0; p <= 100; p += 25) { const y = T + ph - p / 100 * ph; g.beginPath(); g.moveTo(L, y); g.lineTo(w - R, y); g.stroke(); g.fillText(p + '%', 2, y + 4); }
+  ['-10 min', '-5 min', 'ahora'].forEach((t, i) => { const x = L + i * pw / 2; g.fillText(t, Math.min(Math.max(x - 18, L), w - R - 36), h - 4); });
+  const now = Date.now() / 1000;
+  const series = [['ram', ramTot, '--c-ram'], ['vram', vramTot, '--c-vram'], ['util', 100, '--c-util']];
+  for (const [k, tot, col] of series) {
+    g.strokeStyle = css(col); g.lineWidth = 2; g.beginPath(); let first = true;
+    for (const s of hist) { const x = L + pw * (1 - (now - s.t) / 600); if (x < L) continue; const y = T + ph - Math.min(s[k] / tot, 1) * ph; first ? g.moveTo(x, y) : g.lineTo(x, y); first = false; }
+    g.stroke();
+  }
+}
+async function tick() {
+  try {
+    const d = await (await fetch('/api/stats')).json(); last = d;
+    const r = d.now.ram, gp = d.now.gpu;
+    $('ram').innerHTML = `${fmt(r.used)} <small>/ ${fmt(r.total, 0)} GB</small>`;
+    $('ramsub').textContent = `${fmt(r.total - r.used)} GB libres`; $('rambar').style.width = (r.used / r.total * 100) + '%';
+    $('commit').innerHTML = `${fmt(r.commit_used)} <small>/ ${fmt(r.commit_total, 0)} GB</small>`;
+    $('commitbar').style.width = (r.commit_used / r.commit_total * 100) + '%';
+    if (gp) {
+      $('gpuname').textContent = `${gp.name} · driver ${gp.driver}`;
+      $('vram').innerHTML = `${fmt(gp.vram_used)} <small>/ ${fmt(gp.vram_total, 0)} GB</small>`;
+      $('vramsub').textContent = `${fmt(gp.vram_total - gp.vram_used)} GB libres`; $('vrambar').style.width = (gp.vram_used / gp.vram_total * 100) + '%';
+      $('util').innerHTML = `${fmt(gp.util, 0)} <small>%</small>`; $('utilbar').style.width = gp.util + '%';
+      $('utilsub').textContent = `${fmt(gp.temp, 0)} °C · ${fmt(gp.power, 0)} W`;
+    }
+    $('model').innerHTML = d.model ? `<span class="pill on">${d.model}</span>` : '<span class="pill">Ninguno cargado</span>';
+    $('procs').innerHTML = d.procs.length ? d.procs.map(p => `<tr><td>${p.name.replace(/[<>&]/g, '')}</td><td>${p.pid}</td><td class="r">${fmt(p.vram, 2)} GB</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">Ningún proceso CUDA usando la GPU</td></tr>';
+    draw(d.history, r.total, gp ? gp.vram_total : 24);
+  } catch (e) { $('model').innerHTML = '<span class="pill">Sin conexión con el servidor</span>'; }
+}
+tick(); setInterval(tick, 2000);
+addEventListener('resize', () => last && draw(last.history, last.now.ram.total, last.now.gpu ? last.now.gpu.vram_total : 24));
+</script>
+</body>
+</html>

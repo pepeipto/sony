@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temas de Sony</title>
+<link rel="stylesheet" href="/static/tema.css"><link rel="stylesheet" href="/static/temas-extra.css">
+<style>
+  body { padding: 20px; background: #888; }
+  h1 { color: #fff; font: 600 20px/1.2 system-ui; margin: 0 0 14px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .vent { background: var(--bg); color: var(--text); border-radius: 16px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,.3); font: 14px/1.45 var(--sans); }
+  .barra { display: flex; gap: 6px; align-items: center; padding: 10px 14px; background: var(--bg-2); border-bottom: 1px solid var(--line); }
+  .barra b { margin-left: 6px; font-family: var(--serif); font-weight: 400; font-size: 16px; }
+  .cuerpo { display: grid; grid-template-columns: 110px 1fr; min-height: 230px; }
+  .lado { background: var(--bg-2); border-right: 1px solid var(--line); padding: 10px; display: grid; gap: 6px; align-content: start; }
+  .lado span { padding: 5px 8px; border-radius: 8px; color: var(--muted); font-size: 12.5px; }
+  .lado span.on { background: var(--surface); color: var(--text); }
+  .chat { padding: 12px; display: grid; gap: 10px; align-content: start; }
+  .yo { justify-self: end; background: var(--accent-soft); padding: 7px 11px; border-radius: 12px; max-width: 85%; }
+  .ia { background: var(--surface); border: 1px solid var(--line); padding: 8px 11px; border-radius: 12px; }
+  .ia small { color: var(--muted); display: block; margin-top: 4px; }
+  .fila { display: flex; gap: 8px; align-items: center; }
+  .caja { flex: 1; border: 1px solid var(--line-2); background: var(--surface); border-radius: 10px; padding: 6px 10px; color: var(--faint); }
+  .pie { padding: 8px 14px; font-weight: 600; background: var(--surface); border-top: 1px solid var(--line); }
+  .estado { color: var(--ok); }
+</style></head><body>
+<h1>Temas para la ventana de IA Sony — elige uno</h1>
+<div class="rejilla" id="r"></div>
+<script>
+const T = [["", "Claro (crema) · actual"], ["dark-prev", "Oscuro (gris cálido) · actual"], ["tema-nebulosa", "Nebulosa (azul y violeta, oscuro)"],
+  ["tema-contraste", "Alto contraste (negro y amarillo)"], ["tema-bosque", "Bosque (verdes suaves, claro)"], ["tema-atardecer", "Atardecer (cálido, oscuro)"],
+  ["tema-oceano", "Océano (azules, claro)"]];
+document.getElementById('r').innerHTML = T.map(([c, n]) => `<div class="vent ${c}" ${c === 'dark-prev' ? 'style="--bg:#262522;--bg-2:#1f1e1c;--surface:#302f2b;--line:#3c3a35;--line-2:#4a4741;--text:#ecebe6;--muted:#a8a49a;--faint:#7d796f;--accent:#d27150;--accent-soft:#46322a;--ok:#5b8a5a"' : ''}>
+  <div class="barra">● ● ●<b>IA Sony</b></div>
+  <div class="cuerpo"><div class="lado"><span class="on">Chat</span><span>Proyectos</span><span>Programados</span><span>Ajustes</span></div>
+  <div class="chat"><div class="yo">¿Qué tengo hoy en el calendario?</div>
+  <div class="ia">A las 17:00 tienes clase del curso. ¿Quieres que te prepare un resumen?<small>Sony · <span class="estado">● Qwen 27B</span></small></div>
+  <div class="fila"><span class="caja">Escribe a Sony…</span><button class="btn btn-accent">Enviar</button></div></div></div>
+  <div class="pie">${n}</div></div>`).join('');
+</script></body></html>

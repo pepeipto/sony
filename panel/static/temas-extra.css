@@ -1,0 +1,109 @@
+/* Temas extra de «IA Sony» (solo colores; sin animaciones ni gráfica). Se aplican con <html data-theme="…">.
+   La clase .tema-… es para la vista previa. */
+:root[data-theme="nebulosa"], .tema-nebulosa {
+  --bg: #14142b; --bg-2: #0f0f22; --surface: #1d1d3a; --line: #2c2c52; --line-2: #3a3a66;
+  --text: #e8e6ff; --muted: #a6a3d1; --faint: #7470a6;
+  --accent: #9b7bff; --accent-2: #b39bff; --accent-soft: #2e2757;
+  --ok: #6fd3a8; --warn: #f2c063; --bad: #ff7a8a;
+  --c-ram: #b39bff; --c-vram: #6cc6ff; --c-util: #6fd3a8;
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(20,10,60,.45);
+  color-scheme: dark;
+}
+:root[data-theme="contraste"], .tema-contraste {
+  --bg: #000000; --bg-2: #0a0a0a; --surface: #111111; --line: #5c5c5c; --line-2: #8a8a8a;
+  --text: #ffffff; --muted: #e0e0e0; --faint: #bdbdbd;
+  --accent: #ffd400; --accent-2: #ffe14d; --accent-soft: #332b00;
+  --ok: #4dff88; --warn: #ffd400; --bad: #ff5c5c;
+  --c-ram: #ffd400; --c-vram: #4dc3ff; --c-util: #4dff88;
+  --shadow: none;
+  color-scheme: dark;
+}
+:root[data-theme="contraste"] .btn-accent, .tema-contraste .btn-accent { color: #000; }
+:root[data-theme="bosque"], .tema-bosque {
+  --bg: #eef2ea; --bg-2: #e4eadf; --surface: #f8faf5; --line: #d3dccb; --line-2: #c1cdb6;
+  --text: #1f2a1e; --muted: #5e6b5a; --faint: #8c9886;
+  --accent: #3f7a4f; --accent-2: #33653f; --accent-soft: #dbe9dc;
+  --ok: #3f7a4f; --warn: #b9862b; --bad: #b24a3c;
+  --c-ram: #3f7a4f; --c-vram: #4f7fa3; --c-util: #8a9a3d;
+  --shadow: 0 1px 2px rgba(20,40,20,.05), 0 4px 18px rgba(20,40,20,.06);
+  color-scheme: light;
+}
+:root[data-theme="atardecer"], .tema-atardecer {
+  --bg: #2a1d1a; --bg-2: #231815; --surface: #352521; --line: #4a332d; --line-2: #5c4038;
+  --text: #f7e9df; --muted: #d1b3a2; --faint: #9c7f70;
+  --accent: #ff8a4c; --accent-2: #ffa06c; --accent-soft: #4d2c1f;
+  --ok: #9ccf7a; --warn: #f2b84b; --bad: #ff6f61;
+  --c-ram: #ff8a4c; --c-vram: #7fb2e0; --c-util: #9ccf7a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 22px rgba(30,10,0,.35);
+  color-scheme: dark;
+}
+:root[data-theme="oceano"], .tema-oceano {
+  --bg: #eef4f8; --bg-2: #e3edf4; --surface: #f8fbfd; --line: #d0dee8; --line-2: #bccfdd;
+  --text: #16232e; --muted: #56697a; --faint: #8697a6;
+  --accent: #1f6fb2; --accent-2: #185c94; --accent-soft: #d8e7f4;
+  --ok: #2f8a6a; --warn: #c08a2e; --bad: #c2473d;
+  --c-ram: #1f6fb2; --c-vram: #2f8a8a; --c-util: #5f9a4b;
+  --shadow: 0 1px 2px rgba(10,30,50,.05), 0 4px 18px rgba(10,30,50,.07);
+  color-scheme: light;
+}
+
+/* ===================== Tema «Sombra» (15/11/2026) =====================
+   Colores sacados del icono de Sony: negro carbón, carmesí del visor, humo rojo, terracota y brillo metálico.
+   Solo CSS (gradientes estáticos y un pulso suave): casi nada de GPU, nada de WebGL. */
+:root[data-theme="sombra"], .tema-sombra {
+  --bg: #0e0c0c; --bg-2: #141111; --surface: #1b1717; --line: #2b2323; --line-2: #3a2e2e;
+  --text: #f1e9e6; --muted: #bfaea9; --faint: #8c7a75;
+  --accent: #d42a42; --accent-2: #ef3b54; --accent-soft: #3a1419;
+  --ok: #7fcf9a; --warn: #f0b45a; --bad: #ff5d6e;
+  --c-ram: #ef3b54; --c-vram: #c9a27e; --c-util: #7fcf9a;
+  --metal: #b9b2ad; --visor: #ff2e48; --terracota: #c2603e;
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 28px rgba(60,0,8,.35);
+  color-scheme: dark;
+}
+:root[data-theme="sombra"] body {
+  background:
+    radial-gradient(1100px 520px at 85% 110%, rgba(150,18,34,.20), transparent 60%),
+    radial-gradient(800px 420px at 8% -10%, rgba(194,96,62,.10), transparent 60%),
+    radial-gradient(600px 600px at 50% 45%, rgba(40,10,14,.35), transparent 70%),
+    #0e0c0c;
+  background-attachment: fixed;
+}
+:root[data-theme="sombra"] #main, :root[data-theme="sombra"] #app { background: transparent; }
+:root[data-theme="sombra"] #side { background: linear-gradient(180deg, #151111, #110e0e 70%, #1a0d10); border-right-color: #2b2323; }
+:root[data-theme="sombra"] a { color: #ff6b7d; }
+:root[data-theme="sombra"] a.nav-item { color: var(--text); }
+:root[data-theme="sombra"] .nav-item:hover { background: rgba(212,42,66,.10); }
+:root[data-theme="sombra"] .nav-item.accent { color: #ff6b7d; }
+:root[data-theme="sombra"] ::selection { background: rgba(212,42,66,.45); color: #fff; }
+:root[data-theme="sombra"] .btn-accent, :root[data-theme="sombra"] .send { background: linear-gradient(180deg, #e0334b, #b81d33); border-color: #b81d33; color: #fff; box-shadow: 0 0 0 1px rgba(255,46,72,.25), 0 4px 14px rgba(212,42,66,.25); }
+:root[data-theme="sombra"] .send:hover { background: linear-gradient(180deg, #f0435b, #c8213a); }
+/* Ranura del visor: línea carmesí bajo la cabecera */
+:root[data-theme="sombra"] #top { position: relative; }
+:root[data-theme="sombra"] #top::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,46,72,.55), transparent); }
+/* Marca: el icono de Sony en la barra lateral y en el saludo */
+:root[data-theme="sombra"] .brand::before { content: ""; display: inline-block; width: 22px; height: 22px; margin-right: 8px; vertical-align: -4px;
+  border-radius: 6px; background: url(/static/icono-sony-192.png) center/cover; box-shadow: 0 0 0 1px #3a2e2e, 0 0 10px rgba(255,46,72,.25); }
+:root[data-theme="sombra"] .marca svg { display: none; }
+:root[data-theme="sombra"] .marca { width: 46px; height: 46px; border-radius: 12px; background: url(/static/icono-sony-192.png) center/cover;
+  box-shadow: 0 0 0 1px #3a2e2e, 0 0 22px rgba(255,46,72,.30); display: inline-block; }
+/* Marca de agua de la capucha en la pantalla de inicio */
+:root[data-theme="sombra"] #bienvenida { position: relative; }
+:root[data-theme="sombra"] #bienvenida::before { content: ""; position: absolute; left: 50%; top: 4vh; width: min(520px, 80vw); aspect-ratio: 1; transform: translateX(-50%);
+  background: url(/static/icono-sony-512.png) center/cover; opacity: .07; filter: grayscale(.3) contrast(1.1); pointer-events: none; z-index: 0;
+  -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
+:root[data-theme="sombra"] #bienvenida > * { position: relative; z-index: 1; }
+/* Avatar de Sony en cada respuesta */
+:root[data-theme="sombra"] .msg.ia { position: relative; padding-left: 42px; }
+:root[data-theme="sombra"] .msg.ia::before { content: ""; position: absolute; left: 0; top: 2px; width: 30px; height: 30px; border-radius: 9px;
+  background: url(/static/icono-sony-192.png) center/cover; box-shadow: 0 0 0 1px #6a2430, 0 0 8px rgba(255,46,72,.28); }
+/* «Ojos» encendidos mientras Sony piensa o habla */
+@keyframes sombra-ojos { 0%,100% { box-shadow: 0 0 0 1px #5a1a24, 0 0 6px rgba(255,46,72,.35); } 50% { box-shadow: 0 0 0 1px #ff2e48, 0 0 16px rgba(255,46,72,.75); } }
+:root[data-theme="sombra"] .msg.ia:has(.cursor-final, .pensando)::before { animation: sombra-ojos 1.6s ease-in-out infinite; }
+:root[data-theme="sombra"] #app:has(#vozBarra.voz-pensando, #vozBarra.voz-hablando) .brand::before,
+:root[data-theme="sombra"] #app:has(#vozBarra.voz-pensando, #vozBarra.voz-hablando) .msg.ia:last-of-type::before { animation: sombra-ojos 1.2s ease-in-out infinite; }
+:root[data-theme="sombra"] #app:has(#vozBarra.voz-hablando) #top::after { background: linear-gradient(90deg, transparent, #ff2e48, transparent); box-shadow: 0 0 10px rgba(255,46,72,.6); }
+:root[data-theme="sombra"] .burbuja { background: #1f1919; border: 1px solid #2f2626; }
+:root[data-theme="sombra"] .pill { border-color: #3a2e2e; }
+@media (prefers-reduced-motion: reduce) { :root[data-theme="sombra"] * { animation: none !important; } }
+@media (max-width: 760px) { :root[data-theme="sombra"] .msg.ia { padding-left: 36px; } :root[data-theme="sombra"] .msg.ia::before { width: 26px; height: 26px; } }

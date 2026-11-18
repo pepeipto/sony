@@ -1,0 +1,22 @@
+/* Extras de la nebulosa 3D (el resto se reutiliza de nebulosa.css) */
+body { background: #040308; }
+#escena { position: fixed; inset: 0; cursor: grab; touch-action: none; }
+#escena:active { cursor: grabbing; }
+#escena.sobre { cursor: pointer; }
+#escena canvas { display: block; width: 100vw; height: 100vh; }
+
+#n3-rotulos { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.n3-rotulo { position: absolute; left: 0; top: 0; white-space: nowrap; font: 400 15px var(--serif); letter-spacing: .02em;
+  text-shadow: 0 0 10px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9); transition: opacity .25s; will-change: transform; }
+
+.n3-info { position: fixed; right: 14px; bottom: 10px; font: 10.5px var(--mono); color: #6f6a62;
+  background: rgba(10,9,14,.45); border-radius: 6px; padding: 2px 7px; pointer-events: auto; user-select: none; }
+.n3-aviso { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #d6bf8a;
+  background: rgba(30,26,18,.72); border: 1px solid rgba(214,191,138,.25); border-radius: 999px; padding: 4px 12px;
+  backdrop-filter: blur(6px); pointer-events: none; }
+.neb-nav a.activo { border-color: rgba(210,113,80,.5); }
+
+@media (max-width: 640px) {
+  .n3-aviso { top: auto; bottom: 34px; }
+  .n3-rotulo { font-size: 12px; }
+}

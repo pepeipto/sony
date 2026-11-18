@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Icono original de Sony: «ninja de las sombras» (diseño propio, no es arte de Riot). -->
+  <defs>
+    <radialGradient id="fondo" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#3a0d0d"/><stop offset=".55" stop-color="#160707"/><stop offset="1" stop-color="#050303"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9d4cf"/><stop offset=".35" stop-color="#8d8782"/><stop offset=".7" stop-color="#3b3735"/><stop offset="1" stop-color="#1a1817"/>
+    </linearGradient>
+    <linearGradient id="metal2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2eee9"/><stop offset=".5" stop-color="#6e6864"/><stop offset="1" stop-color="#211f1e"/>
+    </linearGradient>
+    <linearGradient id="filo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff5a3c"/><stop offset=".5" stop-color="#ffd2b8"/><stop offset="1" stop-color="#ff5a3c"/>
+    </linearGradient>
+    <radialGradient id="ojo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fff2e8"/><stop offset=".35" stop-color="#ff4a2a"/><stop offset="1" stop-color="#ff1e0a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="brillo" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="humo" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .03" numOctaves="3" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="38"/><feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#fondo)"/>
+  <!-- humo de sombras -->
+  <g filter="url(#humo)" opacity=".75">
+    <ellipse cx="150" cy="380" rx="150" ry="70" fill="#2a0606"/><ellipse cx="370" cy="400" rx="160" ry="60" fill="#230505"/>
+    <ellipse cx="256" cy="450" rx="230" ry="50" fill="#120303"/>
+  </g>
+  <!-- cuchillas de los hombros -->
+  <path d="M60 470 L170 330 L200 352 L120 470 Z" fill="url(#metal2)" stroke="#0a0908" stroke-width="3"/>
+  <path d="M452 470 L342 330 L312 352 L392 470 Z" fill="url(#metal2)" stroke="#0a0908" stroke-width="3"/>
+  <path d="M172 334 L186 345 L118 466 L104 466 Z" fill="url(#filo)" opacity=".85"/>
+  <path d="M340 334 L326 345 L394 466 L408 466 Z" fill="url(#filo)" opacity=".85"/>
+  <!-- casco -->
+  <path d="M256 70 C180 70 128 128 124 205 C121 265 140 318 175 352 L210 388 L256 404 L302 388 L337 352 C372 318 391 265 388 205 C384 128 332 70 256 70 Z"
+        fill="url(#metal)" stroke="#0b0a09" stroke-width="5"/>
+  <!-- cresta central en V -->
+  <path d="M256 40 L276 150 L256 196 L236 150 Z" fill="url(#metal2)" stroke="#0b0a09" stroke-width="4"/>
+  <path d="M256 50 L262 150 L256 178 L250 150 Z" fill="#fff" opacity=".35"/>
+  <!-- placas laterales -->
+  <path d="M128 200 L196 176 L206 250 L150 300 Z" fill="#2d2a28" opacity=".85"/>
+  <path d="M384 200 L316 176 L306 250 L362 300 Z" fill="#2d2a28" opacity=".85"/>
+  <!-- visera oscura -->
+  <path d="M150 214 Q256 186 362 214 L346 262 Q256 240 166 262 Z" fill="#070606" stroke="#000" stroke-width="3"/>
+  <!-- ojos: resplandor y ranuras -->
+  <g filter="url(#brillo)"><ellipse cx="208" cy="232" rx="46" ry="16" fill="#ff2a12"/><ellipse cx="304" cy="232" rx="46" ry="16" fill="#ff2a12"/></g>
+  <path d="M172 234 L240 222 L236 240 Z" fill="url(#ojo)"/><path d="M340 234 L272 222 L276 240 Z" fill="url(#ojo)"/>
+  <path d="M180 233 L236 225 L233 236 Z" fill="#ffe9de"/><path d="M332 233 L276 225 L279 236 Z" fill="#ffe9de"/>
+  <!-- mentonera con rejilla -->
+  <path d="M198 300 L256 290 L314 300 L296 360 L256 378 L216 360 Z" fill="#191716" stroke="#000" stroke-width="3"/>
+  <g stroke="#5d5753" stroke-width="3" opacity=".9">
+    <path d="M222 312 L230 352"/><path d="M240 308 L244 360"/><path d="M256 306 L256 366"/><path d="M272 308 L268 360"/><path d="M290 312 L282 352"/>
+  </g>
+  <!-- reflejos -->
+  <path d="M190 110 Q256 84 322 110 Q256 100 190 120 Z" fill="#fff" opacity=".45"/>
+  <path d="M140 210 Q150 150 196 116" stroke="#fff" stroke-width="4" fill="none" opacity=".35"/>
+  <!-- marca de Sony: estrella terracota en la frente -->
+  <path d="M256 128 L262 146 L280 152 L262 158 L256 176 L250 158 L232 152 L250 146 Z" fill="#ff8a5c" stroke="#3a1206" stroke-width="2"/>
+</svg>

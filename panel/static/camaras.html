@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cámaras · Sony</title>
+<link rel="apple-touch-icon" href="/static/icono-sony-180.png"><link rel="icon" type="image/png" href="/static/icono-sony-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#262522">
+<link rel="stylesheet" href="/static/tema.css"><link rel="stylesheet" href="/static/temas-extra.css">
+<style>
+  body { margin: 0; background: #0f0f0e; color: #eee; font: 14px var(--sans); padding: env(safe-area-inset-top) 8px env(safe-area-inset-bottom); }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 4px; }
+  header h1 { font: 400 22px var(--serif); margin: 0; flex: 1; }
+  header a, header button { color: #ddd; background: #262522; border: 1px solid #3c3a35; border-radius: 10px; padding: 6px 12px; text-decoration: none; font-size: 14px; }
+  #rejilla { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  @media (max-width: 900px) { #rejilla { grid-template-columns: repeat(2, 1fr); } }
+  .cam { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; }
+  .cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cam .n { position: absolute; left: 6px; bottom: 6px; background: rgba(0,0,0,.55); padding: 2px 8px; border-radius: 8px; font-size: 12px; }
+  .cam .t { position: absolute; right: 6px; top: 6px; background: rgba(194,96,62,.85); padding: 1px 7px; border-radius: 8px; font-size: 11px; }
+  #grande { position: fixed; inset: 0; background: #000; display: none; z-index: 10; flex-direction: column; }
+  #grande.on { display: flex; }
+  #grande video { flex: 1; width: 100%; min-height: 0; object-fit: contain; background: #000; }
+  #barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); background: #161615; }
+  #barra button { min-width: 52px; min-height: 48px; font-size: 18px; border-radius: 12px; border: 1px solid #3c3a35; background: #262522; color: #eee; touch-action: none; user-select: none; }
+  #barra .nom { flex-basis: 100%; text-align: center; font-weight: 600; }
+  .aviso { padding: 30px; text-align: center; color: #bbb; }
+</style></head><body>
+<header><h1>Cámaras</h1><a href="/chat">← Sony</a></header>
+<div id="rejilla"></div>
+<div id="grande"><video id="vg" autoplay playsinline muted></video><div id="barra"></div></div>
+<script>
+const esIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const src = (id, q) => esIOS ? `/api/camaras/g2r/stream.m3u8?src=${id}_${q}` : `/api/camaras/g2r/stream.mp4?src=${id}_${q}`;
+const ptz = (id, d) => fetch('/api/camaras/ptz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...d }) })
+  .then(r => r.json()).then(j => { if (j.error) alert(j.error); }).catch(() => {});
+let L = [];
+async function cargar() {
+  const d = await (await fetch('/api/camaras/lista')).json();
+  if (d.error) { document.getElementById('rejilla').outerHTML = `<div class="aviso">${d.error}</div>`; return; }
+  if (!d.credenciales) { document.getElementById('rejilla').outerHTML = '<div class="aviso">Falta el usuario y la contraseña de las cámaras.<br>En el PC: Sony → Ajustes → Conectores → Cámaras.</div>'; return; }
+  L = d.camaras;
+  document.getElementById('rejilla').innerHTML = L.map((c, i) => `<div class="cam" data-i="${i}"><video autoplay playsinline muted preload="none"></video><span class="n">${c.nombre}</span>${c.tipo === 'ptz' ? '<span class="t">PTZ</span>' : ''}</div>`).join('');
+  // calidad baja en la cuadrícula, siempre en silencio; solo las que se ven en pantalla
+  const obs = new IntersectionObserver(es => es.forEach(e => { const v = e.target.querySelector('video'), c = L[e.target.dataset.i];
+    if (e.isIntersecting) { if (!v.src) v.src = src(c.id, 'sub'); } else { v.removeAttribute('src'); v.load(); } }), { threshold: .1 });
+  document.querySelectorAll('.cam').forEach(el => { obs.observe(el); el.onclick = () => abrir(+el.dataset.i); });
+}
+function abrir(i) {
+  const c = L[i], g = document.getElementById('grande'), v = document.getElementById('vg');
+  v.src = src(c.id, 'main'); v.muted = true; g.classList.add('on');
+  const mover = c.tipo === 'ptz' ? [['arriba', '▲'], ['abajo', '▼'], ['izquierda', '◀'], ['derecha', '▶']] : [];
+  document.getElementById('barra').innerHTML = `<div class="nom">${c.nombre}</div>` +
+    [...mover, ['acercar', '＋'], ['alejar', '－']].map(([a, s]) => `<button data-a="${a}">${s}</button>`).join('') +
+    (c.tipo === 'ptz' ? [1, 2, 3, 4].map(n => `<button data-p="${n}">P${n}</button>`).join('') : '') +
+    '<button id="son">🔇</button><button id="cerrar">✕</button>';
+  document.querySelectorAll('#barra [data-a]').forEach(b => {  // mantener pulsado = mover; soltar = parar
+    const a = b.dataset.a, ini = e => { e.preventDefault(); ptz(c.id, { accion: a }); }, fin = () => ptz(c.id, { accion: a, parar: true });
+    b.onpointerdown = ini; b.onpointerup = fin; b.onpointerleave = e => { if (e.buttons) fin(); };
+  });
+  document.querySelectorAll('#barra [data-p]').forEach(b => b.onclick = () => ptz(c.id, { preset: +b.dataset.p }));
+  document.getElementById('son').onclick = e => { v.muted = !v.muted; e.target.textContent = v.muted ? '🔇' : '🔊'; };
+  document.getElementById('cerrar').onclick = () => { v.removeAttribute('src'); v.load(); g.classList.remove('on'); };
+}
+cargar();
+</script></body></html>

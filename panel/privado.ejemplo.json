@@ -1,0 +1,9 @@
+{
+  "camaras": [["ENTRADA", "192.168.1.50", "ptz"], ["JARDIN", "192.168.1.51", "zoom"]],
+  "ciudad": "Madrid",
+  "nvr_ip": "192.168.1.40",
+  "push_sub": "mailto:tu@correo.com",
+  "cuentas_extra": [
+    {"id": "trabajo", "nombre": "Trabajo", "color": "#c2603e", "direccion": "", "dominio": "", "proveedor": "gmail"}
+  ]
+}

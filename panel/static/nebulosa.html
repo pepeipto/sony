@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nebulosa IA</title>
+<link rel="stylesheet" href="/static/tema.css">
+<link rel="stylesheet" href="/static/nebulosa.css">
+</head>
+<body>
+<canvas id="cielo" aria-label="Mapa de notas del segundo cerebro"></canvas>
+
+<header class="neb-cab">
+  <div class="neb-marca">
+    <h1 class="serif" id="neb-titulo">Nebulosa</h1>
+    <p id="neb-stats">Cargando el segundo cerebro…</p>
+  </div>
+  <nav class="neb-nav">
+    <a href="/" title="Volver al panel">Panel</a>
+    <a href="/chat" title="Ir al chat">Chat</a>
+    <a id="neb-alt" href="/galaxia-espiral">Espiral</a>
+    <a id="neb-3d" href="/nebulosa" title="Vista 3D">3D</a>
+  </nav>
+</header>
+
+<div class="neb-buscar">
+  <input id="neb-q" type="search" placeholder="Buscar nota…" autocomplete="off" spellcheck="false">
+  <ul id="neb-res" hidden></ul>
+</div>
+
+<aside class="neb-leyenda" id="neb-leyenda" aria-label="Constelaciones"></aside>
+
+<aside class="neb-ficha" id="neb-ficha" hidden>
+  <button class="neb-cerrar" id="neb-cerrar" aria-label="Cerrar">×</button>
+  <div class="neb-ficha-tema" id="f-tema"></div>
+  <h2 class="serif" id="f-titulo"></h2>
+  <div class="neb-ficha-meta" id="f-meta"></div>
+  <div class="neb-ficha-texto" id="f-texto"></div>
+  <h3 id="f-enl-h">Enlaces</h3>
+  <ul class="neb-ficha-enl" id="f-enl"></ul>
+</aside>
+
+<div class="neb-tip" id="neb-tip" hidden></div>
+<div class="neb-ayuda">Rueda: zoom · Arrastrar: mover · Clic: abrir nota · Doble clic: encuadrar</div>
+<script src="/static/nebulosa.js"></script>
+</body>
+</html>

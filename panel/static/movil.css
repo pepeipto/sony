@@ -1,0 +1,30 @@
+/* Sony en el iPhone (pantalla de inicio): barra lateral deslizable, caja abajo con safe-area, sin zoom al escribir. */
+@media (max-width: 760px) {
+  html, body { height: 100%; overscroll-behavior: none; }
+  body { padding-top: env(safe-area-inset-top); }
+  #side { position: fixed; top: 0; bottom: 0; left: 0; z-index: 60; width: min(82vw, 300px); box-shadow: 8px 0 30px rgba(0,0,0,.25);
+          padding-top: env(safe-area-inset-top); transition: transform .22s ease, margin .22s ease; }
+  #app.sin-side #side { margin-left: 0; transform: translateX(-105%); box-shadow: none; }
+  #app:not(.sin-side)::after { content: ""; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 50; }
+  #btnSide2 { display: inline-flex !important; }
+  #top { padding: 6px 10px; gap: 6px; }
+  #top .pill, #btnModelo, #btnPanelDer { display: none; }
+  .titulo-hilo { font-size: 15px; }
+  #composerWrap { position: sticky; bottom: 0; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); background: var(--bg); }
+  #composer { border-radius: 18px; }
+  #entrada, input, textarea, select { font-size: 16px !important; } /* iOS no hace zoom con 16 px */
+  .comp-bar { gap: 4px; flex-wrap: nowrap; }
+  .chip-agente { padding: 4px 8px; font-size: 13px; white-space: nowrap; }
+  .model-sel { max-width: 34vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .icon-btn, .send { min-width: 40px; min-height: 40px; }
+  #mensajes { padding: 0 10px; }
+  .msg { max-width: 100%; }
+  /* Tarjetas de permiso grandes y táctiles */
+  .permiso .fila-btn button, [data-pend] button, .tarjeta-permiso button { min-height: 46px; font-size: 16px; flex: 1 1 100%; }
+  .permiso .fila-btn, .tarjeta-permiso .fila-btn { flex-wrap: wrap; gap: 8px; }
+  /* Ajustes y modales a pantalla completa */
+  .modal, #modal .caja, .ajustes { width: 100vw !important; max-width: 100vw !important; height: 100%; border-radius: 0 !important; }
+}
+/* Aviso cuando Sony no está disponible (PC apagado o Tailscale desconectado) */
+#sinConexion { position: fixed; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top)); z-index: 90;
+  background: var(--bad); color: #fff; padding: 8px 14px; border-radius: 999px; font: 600 14px var(--sans); box-shadow: var(--shadow); }

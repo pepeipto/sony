@@ -1,0 +1,14 @@
+# Librerías de Python que usa Sony (instalar con: pip install -r requirements.txt)
+anthropic
+cryptography
+opencv-python
+faster-whisper
+piper-tts
+kokoro-onnx
+numpy
+py-vapid
+pywebpush
+pypdf
+pypdfium2
+rapidocr-onnxruntime
+truststore
